@@ -1,7 +1,6 @@
-from app.core.database import Base
+from .base import Base
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from typing import List
 
 
@@ -11,5 +10,5 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(90), unique=True, nullable=False)
     user_name: Mapped[str] = mapped_column(String(40), unique=True, nullable=False)
 
-    tasks: Mapped[List['Tasks']] = relationship("Tasks", back_populates="user_tasks")
-    projects: Mapped[List['Projects']] = relationship("Projects", back_populates="user_project")
+    tasks: Mapped[List['Task']] = relationship("Task", back_populates="worker")
+    projects: Mapped[List['Project']] = relationship("Project", back_populates="members")
