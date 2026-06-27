@@ -36,9 +36,23 @@ class UserRepository:
         result = (await self.db.scalars(stmt)).first()
         return result
 
-    def _buid_and_filter(self, user_name: str | None,
-                         email: EmailStr | None) -> ClauseElement | None | ColumnElement[bool]:
-        filters = []
+    async def get_users_on_filters(self, filters: ColumnElement, page_num: int, page_size: int) -> Sequence[UserModel]:
+        """"
+            SELECT query for searching USERS on filters list.
+            Return USERS LIST
+        """
+
+        stmt = (select(UserModel).
+                where(filters).
+                order_by(UserModel.id).
+                offset((page_num - 1) * page_size).
+                limit(page_size))
+        result = (await self.db.scalars(stmt)).all()
+        return result
+
+    def _buid_and_filter(self, user_name: str | None = None,
+                         email: EmailStr | None = None) -> ClauseElement | None | ColumnElement[bool]:
+        filters = [UserModel.is_active == True]
         if user_name:
             filters.append(UserModel.user_name == user_name)
         if email:
@@ -57,4 +71,4 @@ class UserRepository:
 
         if not filters:
             return None
-        return or_(*filters)
+        return and_(UserModel.is_active == True, or_(*filters))

@@ -18,3 +18,13 @@ async def create_user_services(db: AsyncSession, user: CreateUserSchema) -> User
     new_user = await user_repo.create(user)
     await db.commit()
     return new_user
+
+
+async def get_all_users_service(db: AsyncSession,
+
+                                page_num: int = 1,
+                                page_size: int = 10, ) -> list[UserModel]:
+    user_repo = UserRepository(db)
+    filters = user_repo._buid_and_filter()
+    users = await user_repo.get_users_on_filters(filters, page_num, page_size)
+    return users
