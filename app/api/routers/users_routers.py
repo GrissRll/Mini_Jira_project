@@ -1,0 +1,22 @@
+from fastapi import APIRouter, Depends
+from sqlalchemy.util import await_only
+
+from app.core.depends import get_db
+from app.models.users import User as UserModel
+from app.schemas.users import UserResponseSchema
+from app.services.users_services import get_all_users_service
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from typing import List
+
+router = APIRouter(
+    prefix="/users",
+    tags=["users"]
+)
+
+
+@router.get("/", status_code=200, response_model=List[UserResponseSchema])
+async def get_all_users(db: AsyncSession = Depends(get_db),
+                        page_num: int = 1,
+                        page_size: int = 10):
+    return await get_all_users_service(db, page_num, page_size)
