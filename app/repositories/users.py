@@ -51,12 +51,15 @@ class UserRepository:
         return result
 
     def _buid_and_filter(self, user_name: str | None = None,
-                         email: EmailStr | None = None) -> ClauseElement | None | ColumnElement[bool]:
+                         email: EmailStr | None = None,
+                         user_id:int | None = None) -> ClauseElement | None | ColumnElement[bool]:
         filters = [UserModel.is_active == True]
         if user_name:
             filters.append(UserModel.user_name == user_name)
         if email:
             filters.append(UserModel.email == email)
+        if user_id:
+            filters.append(UserModel.id == user_id)
         if not filters:
             return None
         return and_(*filters)

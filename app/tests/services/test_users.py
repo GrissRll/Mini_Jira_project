@@ -1,3 +1,4 @@
+import fastapi.exceptions
 import pytest
 
 from app.repositories.users import UserRepository
@@ -6,7 +7,7 @@ from app.schemas.users import CreateUserSchema
 from sqlalchemy import select, insert, delete
 from sqlalchemy.exc import IntegrityError
 from app.tests.data.users_data.repo_data import users_data, user_data_ok, user_data_exist_email, user_data_exist_name
-from app.services.users_services import create_user_services, get_all_users_service
+from app.services.users_services import create_user_services, get_all_users_service, get_user_by_id_service
 from fastapi.exceptions import HTTPException
 
 
@@ -50,3 +51,21 @@ async def test_get_all_users_service(async_session_maker, expected, arg):
         print(result)
         assert result is not None
         assert len(result) == expected
+
+@pytest.mark.asyncio
+async def test_get_user_by_id_service_ok(async_session_maker):
+    async with async_session_maker() as session:
+        await session.execute(insert(UserModel), user_data_ok)
+        await session.commit()
+        result = await get_user_by_id_service(session, 1)
+        assert result is not None
+        assert result.user_name == user_data_ok["user_name"]
+
+@pytest.mark.asyncio
+async def test_get_user_by_id_service_404(async_session_maker):
+    async with async_session_maker() as session:
+        with pytest.raises(fastapi.exceptions.HTTPException) as exc_info:
+            await get_user_by_id_service(session, 1)
+            exc = exc_info.value
+            assert exc.status_code == 404
+            assert exc.detail == "User not found"

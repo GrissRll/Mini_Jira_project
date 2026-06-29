@@ -3,7 +3,6 @@ from fastapi import HTTPException, status
 from app.schemas.users import CreateUserSchema, UserResponseSchema, UpdateUserSchema
 from app.repositories.users import UserRepository
 from app.models.users import User as UserModel
-from sqlalchemy.exc import IntegrityError
 
 
 async def create_user_services(db: AsyncSession, user: CreateUserSchema) -> UserModel:
@@ -28,3 +27,12 @@ async def get_all_users_service(db: AsyncSession,
     filters = user_repo._buid_and_filter()
     users = await user_repo.get_users_on_filters(filters, page_num, page_size)
     return users
+
+
+async def get_user_by_id_service(db: AsyncSession, user_id: int) -> UserModel:
+    user_repo = UserRepository(db)
+    filters = user_repo._buid_and_filter(user_id=user_id)
+    existing_user = await user_repo.get_user_on_filters(filters)
+    if not existing_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return existing_user
