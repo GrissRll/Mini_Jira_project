@@ -77,18 +77,28 @@ class UserRepository:
         return and_(UserModel.is_active == True, or_(*filters))
 
     async def update(self, user: UserModel, user_data: dict) -> UserModel:
+        """
+            UPDATE query for modifying user data.
+            Return updated user.
+        """
         for key, value in user_data.items():
             setattr(user, key, value)
         await self.db.flush()
         await self.db.refresh(user)
         return user
 
-    async def soft_delete(self, user_id: int):
+    async def soft_delete(self, user_id: int) -> None:
+        """
+            UPDATE query for marking user as inactive.
+        """
         stmt = update(UserModel).where(UserModel.id == user_id).values(is_active=False)
         await self.db.execute(stmt)
         await self.db.flush()
 
-    async def hard_delete(self, user_id: int):
+    async def hard_delete(self, user_id: int) -> None:
+        """
+            DELETE query for permanently removing user.
+        """
         stmt = delete(UserModel).where(UserModel.id == user_id)
         await self.db.execute(stmt)
         await self.db.flush()
