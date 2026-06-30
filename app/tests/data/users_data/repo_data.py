@@ -24,6 +24,11 @@ user_data_ok = {
     "email": "ivan.petrov@example.com",
     "user_name": "Ivan Petrov",
 }
+
+user_data_wrong = {
+    "email": "ivan.petrov@example.com",
+    "user_name": 228,
+}
 user_data_exist_email = {
     "email": "ivan.petrov@example.com",
     "user_name": "Ivan Petrov228",

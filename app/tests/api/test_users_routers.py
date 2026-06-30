@@ -1,5 +1,7 @@
+from idlelib.rpc import response_queue
+
 import pytest
-from app.tests.data.users_data.repo_data import users_data
+from app.tests.data.users_data.repo_data import users_data, user_data_ok, user_data_wrong
 from app.models.users import User as UserModel
 from sqlalchemy import insert
 
@@ -38,3 +40,18 @@ async def test_get_all_users_200_with_users(client, async_session_maker):
     for response_user, expected_user in zip(response_data, expected):
         assert response_user["user_name"] == expected_user["user_name"]
         assert response_user["email"] == expected_user["email"]
+
+
+@pytest.mark.asyncio
+async def test_create_new_user_201(client, async_session_maker):
+    response = await client.post('/users/', json=user_data_ok)
+    resp_data = response.json()
+    assert resp_data is not None
+    assert resp_data["user_name"] == user_data_ok["user_name"]
+    assert response.status_code == 201
+
+
+@pytest.mark.asyncio
+async def test_create_new_user_422(client, async_session_maker):
+    response = await client.post('/users/', json=user_data_wrong)
+    assert response.status_code == 422
