@@ -37,3 +37,16 @@ user_data_exist_name = {
     "email": "ivan229.petrov@example.com",
     "user_name": "Ivan Petrov",
 }
+
+user_data_update_email = {
+    "email": "DIPLODOCK.petrov@example.com"
+}
+
+user_data_update_all = {
+    "email": "DIPLODOCK.petrov@example.com",
+    "user_name": "Ivan Petrov DIPLODOCK"
+}
+
+user_data_update_nothing = {
+
+}
