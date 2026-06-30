@@ -77,3 +77,34 @@ async def test_update(async_session_maker, expected, arg):
         user = (await session.scalars(select(UserModel))).first()
         assert user.user_name == expected["user_name"]
         assert user.email == expected["email"]
+
+@pytest.mark.asyncio
+async def test_soft_delete(async_session_maker):
+    async with async_session_maker() as session:
+        user_repo = UserRepository(session)
+        await session.execute(insert(UserModel), user_data_ok)
+        await session.commit()
+        await user_repo.soft_delete(1)
+        await session.commit()
+        active_user = await session.scalars(select(UserModel).where(UserModel.id == 1, UserModel.is_active == True))
+        active_user = active_user.first()
+        user_inactive = await session.scalars(select(UserModel).where(UserModel.id == 1))
+        user_inactive = user_inactive.first()
+        assert active_user is None
+        assert user_inactive.is_active == False
+
+
+@pytest.mark.asyncio
+async def test_hard_delete(async_session_maker):
+    async with async_session_maker() as session:
+        user_repo = UserRepository(session)
+        await session.execute(insert(UserModel), user_data_ok)
+        await session.commit()
+        await user_repo.hard_delete(1)
+        await session.commit()
+        active_user = await session.scalars(select(UserModel).where(UserModel.id == 1, UserModel.is_active == True))
+        active_user = active_user.first()
+        user_inactive = await session.scalars(select(UserModel).where(UserModel.id == 1))
+        user_inactive = user_inactive.first()
+        assert active_user is None
+        assert user_inactive is None

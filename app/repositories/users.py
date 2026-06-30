@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.users import User as UserModel
-from sqlalchemy import select, update, Sequence, or_, and_
+from sqlalchemy import select, update, Sequence, or_, and_, delete
 from app.schemas.users import CreateUserSchema, UpdateUserSchema
 from sqlalchemy.sql.elements import ClauseElement, ColumnElement
 from pydantic import EmailStr
@@ -82,3 +82,13 @@ class UserRepository:
         await self.db.flush()
         await self.db.refresh(user)
         return user
+
+    async def soft_delete(self, user_id: int):
+        stmt = update(UserModel).where(UserModel.id == user_id).values(is_active=False)
+        await self.db.execute(stmt)
+        await self.db.flush()
+
+    async def hard_delete(self, user_id: int):
+        stmt = delete(UserModel).where(UserModel.id == user_id)
+        await self.db.execute(stmt)
+        await self.db.flush()
