@@ -57,6 +57,8 @@ async def test_create_new_user_422(client):
     assert response.status_code == 422
 
 
+
+
 @pytest.mark.asyncio
 async def test_get_user_by_id_200(client, async_session_maker):
     async with async_session_maker() as session:

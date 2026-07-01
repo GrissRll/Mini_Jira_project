@@ -17,7 +17,7 @@ async def test_create_user_service_ok(async_session_maker):
     async with async_session_maker() as session:
         user_schema = CreateUserSchema(**user_data_ok)
     service = UserService(UserRepository(session))
-    result = await service.create_user_services(user_schema)
+    result = await service.create_user(user_schema)
     assert result is not None
     assert type(result) == UserModel
 
@@ -31,10 +31,10 @@ async def test_create_user_service_400(async_session_maker, expected, arg):
     async with async_session_maker() as session:
         user_schema = CreateUserSchema(**user_data_ok)
         service = UserService(UserRepository(session))
-        await service.create_user_services(user_schema)
+        await service.create_user(user_schema)
         with pytest.raises(expected):
             user_schema = CreateUserSchema(**arg)
-            await service.create_user_services(user_schema)
+            await service.create_user(user_schema)
 
 
 @pytest.mark.asyncio
@@ -48,7 +48,7 @@ async def test_get_all_users_service(async_session_maker, expected, arg):
             await session.execute(insert(UserModel), arg)
             await session.commit()
         service = UserService(UserRepository(session))
-        result = await service.get_all_users_service()
+        result = await service.get_all_users()
         print(result)
         assert result is not None
         assert len(result) == expected
@@ -60,7 +60,7 @@ async def test_get_user_by_id_service_ok(async_session_maker):
         await session.execute(insert(UserModel), user_data_ok)
         await session.commit()
         service = UserService(UserRepository(session))
-        result = await service.get_user_by_id_service( 1)
+        result = await service.get_user_by_id(1)
         assert result is not None
         assert result.user_name == user_data_ok["user_name"]
 
@@ -70,5 +70,5 @@ async def test_get_user_by_id_service_404(async_session_maker):
     async with async_session_maker() as session:
         with pytest.raises(UserNotFoundError):
             service = UserService(UserRepository(session))
-            await service.get_user_by_id_service(1)
+            await service.get_user_by_id(1)
 
