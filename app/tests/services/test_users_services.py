@@ -69,3 +69,4 @@ async def test_get_user_by_id_service_404(async_session_maker):
             exc = exc_info.value
             assert exc.status_code == 404
             assert exc.detail == "User not found"
+
