@@ -4,7 +4,7 @@ from sqlalchemy.util import await_only
 from app.core.depends import get_db
 from app.models.users import User as UserModel
 from app.schemas.users import UserResponseSchema, CreateUserSchema
-from app.services.users_services import get_all_users_service, create_user_services, get_user_by_id_service
+from app.services.users_services import UserService
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from typing import List

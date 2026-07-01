@@ -1,4 +1,4 @@
-from fastapi import FastAPI, status
+from fastapi import FastAPI, status, Request
 from fastapi.responses import JSONResponse
 
 
@@ -7,7 +7,8 @@ from app.exeptions.users_exeptions import (
     UserEmailAlreadyExistsError,
     UserForbiddenError,
     UserNameAlreadyExistsError,
-    UserNotFoundError
+    UserNotFoundError,
+    UserInvalidData
 )
 
 
@@ -45,4 +46,10 @@ def register_exception_handler(app: FastAPI):
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN,
             content={"detail": "Only owner can update profile"}
+        )
+    @app.exception_handler(UserInvalidData)
+    async def user_owner_handler(request:Request, exc:UserInvalidData):
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            content={"detail": exc}
         )

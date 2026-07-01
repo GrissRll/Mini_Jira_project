@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from app.api.routers.users_routers import router as users_router
-from core.exeption_handlers import register_exception_handler
+from .core.exeption_handlers import register_exception_handler
 
 app = FastAPI()
 
