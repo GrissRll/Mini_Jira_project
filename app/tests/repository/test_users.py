@@ -1,10 +1,10 @@
 import pytest
 from app.repositories.users import UserRepository
 from app.models.users import User as UserModel
-from app.schemas.users import CreateUserSchema, UpdateUserSchema
+from app.schemas.users import CreateUserSchema
 from sqlalchemy import select, insert
 from sqlalchemy.exc import IntegrityError
-from app.tests.data.users_data.repo_data import users_data, user_data_ok, user_data_update_all, \
+from app.tests.data.users import users_data, user_data_ok, user_data_update_all, \
     user_data_update_email, user_data_update_nothing
 
 

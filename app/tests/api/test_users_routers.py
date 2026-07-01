@@ -1,7 +1,5 @@
-from idlelib.rpc import response_queue
-
 import pytest
-from app.tests.data.users_data.repo_data import users_data, user_data_ok, user_data_wrong
+from app.tests.data.users import users_data, user_data_ok, user_data_wrong, user_data_exist_email, user_data_exist_name
 from app.models.users import User as UserModel
 from sqlalchemy import insert
 
@@ -52,11 +50,23 @@ async def test_create_new_user_201(client):
 
 
 @pytest.mark.asyncio
-async def test_create_new_user_422(client):
+async def test_create_new_user_422_invalid_schema(client):
     response = await client.post('/users/', json=user_data_wrong)
     assert response.status_code == 422
 
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize("expected, arg", [
+    ({"status_code": 409, "detail": "User email already existing"}, user_data_exist_email),
+    ({"status_code": 409, "detail": "User name already existing"}, user_data_exist_name)
+])
+async def test_create_new_user_409(async_session_maker, client, expected, arg):
+    async with async_session_maker() as session:
+        await session.execute(insert(UserModel), user_data_ok)
+        await session.commit()
+    response = await client.post('/users/', json=arg)
+    assert response.status_code == expected["status_code"]
+    assert response.json()["detail"] == expected["detail"]
 
 
 @pytest.mark.asyncio
@@ -64,7 +74,6 @@ async def test_get_user_by_id_200(client, async_session_maker):
     async with async_session_maker() as session:
         await session.execute(insert(UserModel), user_data_ok)
         await session.commit()
-        await session.close()
     response = await client.get("/users/1")
     assert response is not None
     assert response.status_code == 200

@@ -1,14 +1,13 @@
-import fastapi.exceptions
 import pytest
 from app.repositories.users import UserRepository
 from app.models.users import User as UserModel
 from app.schemas.users import CreateUserSchema
-from app.exeptions.users_exeptions import UserForbiddenError, UserAlreadyExistsError, UserEmailAlreadyExistsError, \
+from app.exeptions.users_exeptions import UserEmailAlreadyExistsError, \
     UserNameAlreadyExistsError, UserNotFoundError
-from sqlalchemy import select, insert, delete
+from sqlalchemy import insert
 
 from app.services.users_services import UserService
-from app.tests.data.users_data.repo_data import users_data, user_data_ok, user_data_exist_email, user_data_exist_name
+from app.tests.data.users import users_data, user_data_ok, user_data_exist_email, user_data_exist_name
 
 
 
