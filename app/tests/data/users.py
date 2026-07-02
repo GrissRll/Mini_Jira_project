@@ -50,3 +50,10 @@ user_data_update_all = {
 user_data_update_nothing = {
 
 }
+user_data_update_existing_email = {
+    "email": "ivan.petrov@example.com",
+}
+
+user_data_update_existing_user_name = {
+    "user_name": "Ivan Petrov"
+}

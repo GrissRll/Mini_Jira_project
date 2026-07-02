@@ -70,6 +70,14 @@ class UserService:
         for key in updated_data:
             if updated_data[key] is None and (key == "email" or key == "user_name"):
                 raise UserInvalidData(key, "cannot be null")
+            if key == "email" or key == "user_name":
+                filters = self.user_repo._buid_and_filter(**{key: updated_data[key]})
+                existing_key = await self.user_repo.get_user_on_filters(filters)
+                if existing_key and key == "email":
+                    raise UserEmailAlreadyExistsError()
+                if existing_key and key == "user_name":
+                    raise UserNameAlreadyExistsError()
+
         try:
             user = await self.user_repo.update(user, updated_data)
             await self.user_repo.db.commit()
