@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends
+from fastapi.responses import JSONResponse
+from sqlalchemy.util import await_only
+
+from app.models.users import User as UserModel
 from app.core.depends import get_db, get_user_service
-from app.schemas.users import UserResponseSchema, CreateUserSchema
+from app.schemas.users import UserResponseSchema, CreateUserSchema, UpdateUserSchema
 from app.services.users_services import UserService
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -40,3 +44,19 @@ async def get_user_by_id(user_id: int, service: UserService = Depends(get_user_s
         Return user.
     """
     return await service.get_user_by_id(user_id)
+
+
+@router.patch("/users/{user_id}", response_model=UserResponseSchema, status_code=204)
+async def update_user(user_id: int, user: UserModel, update_data: UpdateUserSchema,
+                      service: UserService = Depends(get_user_service)):
+    return await service.update_user(update_data, user, user_id)
+
+
+@router.patch("/users/change_status/{user_id}", response_model=JSONResponse, status_code=204)
+async def soft_delete(user_id: int, user: UserModel, service: UserService = Depends(get_user_service)):
+    return await service.soft_delete(user, user_id)
+
+
+@router.delete("/users/{user_id}", response_model=JSONResponse, status_code=204)
+async def hard_delete(user_id: int, user: UserModel, service: UserService = Depends(get_user_service)):
+    return await service.hard_delete(user, user_id)
