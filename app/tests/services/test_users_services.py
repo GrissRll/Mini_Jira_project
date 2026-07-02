@@ -3,7 +3,7 @@ from app.repositories.users import UserRepository
 from app.models.users import User as UserModel
 from app.schemas.users import CreateUserSchema, UpdateUserSchema
 from app.exeptions.users_exeptions import UserEmailAlreadyExistsError, \
-    UserNameAlreadyExistsError, UserNotFoundError,UserForbiddenError
+    UserNameAlreadyExistsError, UserNotFoundError, UserForbiddenError
 from sqlalchemy import insert, select
 
 from app.services.users_services import UserService
@@ -84,6 +84,7 @@ async def test_update_200(async_session_maker):
         assert user.user_name == user_data_update_all["user_name"]
         assert user.email == user_data_update_all["email"]
 
+
 @pytest.mark.asyncio
 @pytest.mark.parametrize("expected, arg", [
     (UserNameAlreadyExistsError, user_data_update_existing_user_name),
@@ -98,6 +99,7 @@ async def test_update_existing_data(async_session_maker, expected, arg):
         with pytest.raises(expected):
             await service.update_user(UpdateUserSchema(**arg), user, 1)
 
+
 @pytest.mark.asyncio
 async def test_update_user_forbidden_error(async_session_maker):
     async with async_session_maker() as session:
@@ -107,3 +109,64 @@ async def test_update_user_forbidden_error(async_session_maker):
         service = UserService(UserRepository(session))
         with pytest.raises(UserForbiddenError):
             await service.update_user(UpdateUserSchema(**user_data_update_all), user, 2)
+
+
+@pytest.mark.asyncio
+async def test_soft_delete_ok(async_session_maker):
+    async with async_session_maker() as session:
+        service = UserService(UserRepository(session))
+        await service.create_user(CreateUserSchema(**user_data_ok))
+        user = (await session.scalars(select(UserModel))).first()
+        response = await service.soft_delete(user, user.id)
+        await session.refresh(user)
+        assert user.is_active is False
+        assert response == {
+            "message": f"User {user.user_name} change status to inactive"
+        }
+
+
+@pytest.mark.asyncio
+async def test_soft_delete_forbidden(async_session_maker):
+    async with async_session_maker() as session:
+        service = UserService(UserRepository(session))
+
+        await service.create_user(CreateUserSchema(**user_data_ok))
+
+        user = (await session.scalars(select(UserModel))).first()
+
+        with pytest.raises(UserForbiddenError):
+            await service.soft_delete(user, user.id + 1)
+
+
+@pytest.mark.asyncio
+async def test_hard_delete_ok(async_session_maker):
+    async with async_session_maker() as session:
+        service = UserService(UserRepository(session))
+
+        await service.create_user(CreateUserSchema(**user_data_ok))
+
+        user = (await session.scalars(select(UserModel))).first()
+
+        response = await service.hard_delete(user, user.id)
+
+        deleted_user = (
+            await session.scalars(select(UserModel))
+        ).first()
+
+        assert deleted_user is None
+        assert response == {
+            "message": f"User {user.user_name} was deleted!"
+        }
+
+
+@pytest.mark.asyncio
+async def test_hard_delete_forbidden(async_session_maker):
+    async with async_session_maker() as session:
+        service = UserService(UserRepository(session))
+
+        await service.create_user(CreateUserSchema(**user_data_ok))
+
+        user = (await session.scalars(select(UserModel))).first()
+
+        with pytest.raises(UserForbiddenError):
+            await service.hard_delete(user, user.id + 1)

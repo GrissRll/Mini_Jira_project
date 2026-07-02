@@ -45,7 +45,7 @@ def register_exception_handler(app: FastAPI):
     async def user_owner_handler(request, exc):
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN,
-            content={"detail": "Only owner can update profile"}
+            content={"detail": "Only owner can update or delete profile"}
         )
     @app.exception_handler(UserInvalidData)
     async def user_owner_handler(request:Request, exc:UserInvalidData):

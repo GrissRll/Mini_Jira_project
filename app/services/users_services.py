@@ -90,3 +90,27 @@ class UserService:
             if "un_users_user_name" in error:
                 raise UserNameAlreadyExistsError
             raise
+
+    async def soft_delete(self, user: UserModel, user_id: int) -> dict:
+        """
+            Change user status to inactive.
+            Raise exception if operation is forbidden.
+            Return confirmation message.
+        """
+        if user.id != user_id:
+            raise UserForbiddenError()
+        await self.user_repo.soft_delete(user_id)
+        await self.user_repo.db.commit()
+        return {"message": f"User {user.user_name} change status to inactive"}
+
+    async def hard_delete(self, user: UserModel, user_id: int) -> dict:
+        """
+            Delete user from database.
+            Raise exception if operation is forbidden.
+            Return confirmation message.
+        """
+        if user.id != user_id:
+            raise UserForbiddenError()
+        await self.user_repo.hard_delete(user_id)
+        await self.user_repo.db.commit()
+        return {"message": f"User {user.user_name} was deleted!"}
