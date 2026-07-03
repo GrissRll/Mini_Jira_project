@@ -17,6 +17,9 @@ class UserNotFoundError(Exception):
 class UserForbiddenError(Exception):
     pass
 
+class UserAuthorizationError(Exception):
+    pass
+
 
 class UserInvalidData(Exception):
     def __init__(self, field: str, reason: str):

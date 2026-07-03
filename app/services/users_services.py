@@ -2,7 +2,9 @@ from app.schemas.users import CreateUserSchema, UpdateUserSchema
 from app.repositories.users import UserRepository
 from app.models.users import User as UserModel
 from app.exeptions.users_exeptions import *
+from app.core.auth import verify_password, create_access_token
 from sqlalchemy.exc import IntegrityError
+from fastapi.security import OAuth2PasswordRequestForm
 
 
 class UserService:
@@ -114,3 +116,12 @@ class UserService:
         await self.user_repo.hard_delete(user_id)
         await self.user_repo.db.commit()
         return {"message": f"User {user.user_name} was deleted!"}
+
+    async def authorization(self, form_data: OAuth2PasswordRequestForm) -> dict:
+        email = form_data.username
+        filters = self.user_repo._buid_and_filter(email=email)
+        user = await self.user_repo.get_user_on_filters(filters)
+        if not user or not verify_password(form_data.password, user.hashed_password):
+            raise UserAuthorizationError()
+        access_token = create_access_token(data={"sub": user.email, "id": user.id})
+        return {"access_token": access_token, "token_type": "bearer"}

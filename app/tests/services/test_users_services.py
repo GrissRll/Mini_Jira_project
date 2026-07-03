@@ -1,9 +1,13 @@
+from calendar import firstweekday
+
 import pytest
 from app.repositories.users import UserRepository
+from fastapi.security import OAuth2PasswordRequestForm
+from app.core.auth import hash_password, verify_password
 from app.models.users import User as UserModel
 from app.schemas.users import CreateUserSchema, UpdateUserSchema
 from app.exeptions.users_exeptions import UserEmailAlreadyExistsError, \
-    UserNameAlreadyExistsError, UserNotFoundError, UserForbiddenError
+    UserNameAlreadyExistsError, UserNotFoundError, UserForbiddenError, UserAuthorizationError
 from sqlalchemy import insert, select
 
 from app.services.users_services import UserService
@@ -170,3 +174,30 @@ async def test_hard_delete_forbidden(async_session_maker):
 
         with pytest.raises(UserForbiddenError):
             await service.hard_delete(user, user.id + 1)
+
+
+@pytest.mark.asyncio
+async def test_authorization_ok(async_session_maker):
+    async with async_session_maker() as session:
+        service = UserService(UserRepository(session))
+        await session.execute(
+            insert(UserModel).values(user_name=user_data_ok["user_name"], email=user_data_ok["email"],
+                                     hashed_password=hash_password(user_data_ok['hashed_password'])))
+        await session.commit()
+        result = await service.authorization(
+            OAuth2PasswordRequestForm(username=user_data_ok["email"], password=user_data_ok["hashed_password"]))
+        assert result is not None
+
+@pytest.mark.asyncio
+async def test_authorization_fail(async_session_maker):
+    async with async_session_maker() as session:
+        service = UserService(UserRepository(session))
+        await session.execute(
+            insert(UserModel).values(user_name=user_data_ok["user_name"], email=user_data_ok["email"],
+                                     hashed_password=hash_password(user_data_ok['hashed_password'])))
+
+        await session.commit()
+        with pytest.raises(UserAuthorizationError):
+            result = await service.authorization(
+                OAuth2PasswordRequestForm(username=user_data_ok["email"], password="123"))
+

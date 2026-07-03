@@ -12,7 +12,7 @@ class User(Base):
     user_name: Mapped[str] = mapped_column(String(40), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default=text("true"))
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
-    hashed_password: Mapped[str] = mapped_column(String(20), nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String, nullable=False)
 
     tasks: Mapped[List['Task']] = relationship("Task", back_populates="worker")
     projects: Mapped[List['Project']] = relationship("Project", back_populates="members")

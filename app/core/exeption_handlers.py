@@ -1,14 +1,14 @@
 from fastapi import FastAPI, status, Request
 from fastapi.responses import JSONResponse
 
-
 from app.exeptions.users_exeptions import (
     UserAlreadyExistsError,
     UserEmailAlreadyExistsError,
     UserForbiddenError,
     UserNameAlreadyExistsError,
     UserNotFoundError,
-    UserInvalidData
+    UserInvalidData,
+    UserAuthorizationError
 )
 
 
@@ -47,9 +47,18 @@ def register_exception_handler(app: FastAPI):
             status_code=status.HTTP_403_FORBIDDEN,
             content={"detail": "Only owner can update or delete profile"}
         )
+
     @app.exception_handler(UserInvalidData)
-    async def user_owner_handler(request:Request, exc:UserInvalidData):
+    async def user_owner_handler(request: Request, exc: UserInvalidData):
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             content={"detail": exc}
+        )
+
+    @app.exception_handler(UserAuthorizationError)
+    async def user_owner_handler(request: Request, exc: UserAuthorizationError):
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"detail": "Incorrect email or password"},
+            headers={"WWW-Authenticate": "Bearer"}
         )

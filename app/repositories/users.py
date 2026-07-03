@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.users import User as UserModel
 from sqlalchemy import select, update, Sequence, or_, and_, delete
-from app.schemas.users import CreateUserSchema, UpdateUserSchema
+from app.schemas.users import CreateUserSchema
 from sqlalchemy.sql.elements import ClauseElement, ColumnElement
 from pydantic import EmailStr
 
@@ -51,7 +51,7 @@ class UserRepository:
         return result
 
     def _buid_and_filter(self, user_name: str | None = None,
-                         email: EmailStr | None = None,
+                         email: EmailStr | str | None = None,
                          user_id: int | None = None) -> ClauseElement | None | ColumnElement[bool]:
         filters = [UserModel.is_active == True]
         if user_name:
