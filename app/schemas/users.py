@@ -6,7 +6,7 @@ class BaseUserSchema(BaseModel):
     user_name: str = Field(min_length=3,max_length=40, description="Enter your name.")
 
 class CreateUserSchema(BaseUserSchema):
-    pass
+    hashed_password:str = Field(min_length=10,description="Enter your password")
 
 class UpdateUserSchema(BaseModel):
     email: EmailStr | None = None

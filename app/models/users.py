@@ -11,7 +11,8 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(90), nullable=False)
     user_name: Mapped[str] = mapped_column(String(40), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default=text("true"))
-    registration_date: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    hashed_password: Mapped[str] = mapped_column(String(20), nullable=False)
 
     tasks: Mapped[List['Task']] = relationship("Task", back_populates="worker")
     projects: Mapped[List['Project']] = relationship("Project", back_populates="members")

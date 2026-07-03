@@ -2,40 +2,53 @@ users_data = [
     {
         "email": "ivan.petrov@example.com",
         "user_name": "Ivan Petrov",
+        "hashed_password": "12345678910"
     },
     {
         "email": "anna.sidorova@example.com",
         "user_name": "Anna Sidorova",
+        "hashed_password": "12345678910"
     },
     {
         "email": "alex.ivanov@example.com",
         "user_name": "Alex Ivanov",
+        "hashed_password": "12345678910"
     },
     {
         "email": "maria.kuznetsova@example.com",
         "user_name": "Maria Kuznetsova",
+        "hashed_password": "12345678910"
     },
     {
         "email": "pavel.smirnov@example.com",
         "user_name": "Pavel Smirnov",
+        "hashed_password": "12345678910"
     },
 ]
 user_data_ok = {
     "email": "ivan.petrov@example.com",
     "user_name": "Ivan Petrov",
+    "hashed_password": "12345678910"
+
 }
 
 user_data_wrong = {
     "email": "ivan.petrov@example.com",
     "user_name": 228,
+    "hashed_password": "12345678910"
+
 }
 user_data_exist_email = {
     "email": "ivan.petrov@example.com",
     "user_name": "Ivan Petrov228",
+    "hashed_password": "12345678910"
+
 }
 user_data_exist_name = {
     "email": "ivan229.petrov@example.com",
     "user_name": "Ivan Petrov",
+    "hashed_password": "12345678910"
+
 }
 
 user_data_update_email = {
@@ -45,6 +58,7 @@ user_data_update_email = {
 user_data_update_all = {
     "email": "DIPLODOCK.petrov@example.com",
     "user_name": "Ivan Petrov DIPLODOCK"
+
 }
 
 user_data_update_nothing = {
@@ -52,8 +66,10 @@ user_data_update_nothing = {
 }
 user_data_update_existing_email = {
     "email": "ivan.petrov@example.com",
+
 }
 
 user_data_update_existing_user_name = {
     "user_name": "Ivan Petrov"
+
 }

@@ -12,7 +12,7 @@ from app.tests.data.users import users_data, user_data_ok, user_data_update_all,
 async def test_create_user_ok(async_session_maker):
     async with async_session_maker() as session:
         repo = UserRepository(session)
-        user_data = CreateUserSchema(email="test_user@mail.com", user_name="Diplodok Ivanov")
+        user_data = CreateUserSchema(**user_data_ok)
         await repo.create(user_data)
         await session.commit()
 
@@ -20,18 +20,18 @@ async def test_create_user_ok(async_session_maker):
         result = result.all()
     assert result is not None
     assert len(result) == 1
-    assert result[0].user_name == "Diplodok Ivanov"
+    assert result[0].user_name == user_data_ok["user_name"]
 
 
 @pytest.mark.asyncio
 async def test_create_existing_user(async_session_maker):
     async with async_session_maker() as session:
         repo = UserRepository(session)
-        user_data = CreateUserSchema(email="test_user@mail.com", user_name="Diplodok Ivanov")
+        user_data = CreateUserSchema(**user_data_ok)
         await repo.create(user_data)
         await session.commit()
         with pytest.raises(IntegrityError):
-            user_data = CreateUserSchema(email="test_user@mail.com", user_name="Diplodok Ivanov")
+            user_data = CreateUserSchema(**user_data_ok)
             await repo.create(user_data)
             await session.flush()
 
