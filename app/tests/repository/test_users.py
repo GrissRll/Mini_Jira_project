@@ -12,8 +12,7 @@ from app.tests.data.users import users_data, user_data_ok, user_data_update_all,
 async def test_create_user_ok(async_session_maker):
     async with async_session_maker() as session:
         repo = UserRepository(session)
-        user_data = CreateUserSchema(**user_data_ok)
-        await repo.create(user_data)
+        await repo.create(user_data_ok)
         await session.commit()
 
         result = await session.scalars(select(UserModel))
@@ -27,12 +26,11 @@ async def test_create_user_ok(async_session_maker):
 async def test_create_existing_user(async_session_maker):
     async with async_session_maker() as session:
         repo = UserRepository(session)
-        user_data = CreateUserSchema(**user_data_ok)
-        await repo.create(user_data)
+        await repo.create(user_data_ok)
         await session.commit()
         with pytest.raises(IntegrityError):
-            user_data = CreateUserSchema(**user_data_ok)
-            await repo.create(user_data)
+
+            await repo.create(user_data_ok)
             await session.flush()
 
 

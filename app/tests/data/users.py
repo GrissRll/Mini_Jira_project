@@ -31,6 +31,12 @@ user_data_ok = {
     "hashed_password": "12345_7891"
 
 }
+user_data_ok_password_v2 = {
+    "email": "ivan.petrov@example.com",
+    "user_name": "Ivan Petrov",
+    "password": "12345_7891"
+
+}
 
 user_data_wrong = {
     "email": "ivan.petrov@example.com",
@@ -50,6 +56,19 @@ user_data_exist_name = {
     "hashed_password": "1234567891"
 
 }
+user_data_exist_email_v2 = {
+    "email": "ivan.petrov@example.com",
+    "user_name": "Ivan Petrov228",
+    "password": "1234567891"
+
+}
+user_data_exist_name_v2 = {
+    "email": "ivan229.petrov@example.com",
+    "user_name": "Ivan Petrov",
+    "password": "1234567891"
+
+}
+
 
 user_data_update_email = {
     "email": "DIPLODOCK.petrov@example.com"

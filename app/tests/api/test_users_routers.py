@@ -1,5 +1,6 @@
 import pytest
-from app.tests.data.users import users_data, user_data_ok, user_data_wrong, user_data_exist_email, user_data_exist_name
+from app.tests.data.users import users_data, user_data_ok, user_data_wrong, user_data_exist_email, user_data_exist_name, \
+    user_data_ok_password_v2, user_data_exist_email_v2, user_data_exist_name_v2
 from app.models.users import User as UserModel
 from sqlalchemy import insert
 
@@ -42,7 +43,7 @@ async def test_get_all_users_200_with_users(client, async_session_maker):
 
 @pytest.mark.asyncio
 async def test_create_new_user_201(client):
-    response = await client.post('/users/', json=user_data_ok)
+    response = await client.post('/users/', json=user_data_ok_password_v2)
     resp_data = response.json()
     assert resp_data is not None
     assert resp_data["user_name"] == user_data_ok["user_name"]
@@ -57,8 +58,8 @@ async def test_create_new_user_422_invalid_schema(client):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("expected, arg", [
-    ({"status_code": 409, "detail": "User email already existing"}, user_data_exist_email),
-    ({"status_code": 409, "detail": "User name already existing"}, user_data_exist_name)
+    ({"status_code": 409, "detail": "User email already existing"}, user_data_exist_email_v2),
+    ({"status_code": 409, "detail": "User name already existing"}, user_data_exist_name_v2)
 ])
 async def test_create_new_user_409(async_session_maker, client, expected, arg):
     async with async_session_maker() as session:

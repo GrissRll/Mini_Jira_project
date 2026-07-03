@@ -12,13 +12,14 @@ from sqlalchemy import insert, select
 
 from app.services.users_services import UserService
 from app.tests.data.users import users_data, user_data_ok, user_data_exist_email, user_data_exist_name, \
-    user_data_update_all, user_data_update_existing_email, user_data_update_existing_user_name
+    user_data_update_all, user_data_update_existing_email, user_data_update_existing_user_name, user_data_ok_password_v2, \
+    user_data_exist_email_v2, user_data_exist_name_v2
 
 
 @pytest.mark.asyncio
 async def test_create_user_service_ok(async_session_maker):
     async with async_session_maker() as session:
-        user_schema = CreateUserSchema(**user_data_ok)
+        user_schema = CreateUserSchema(**user_data_ok_password_v2)
     service = UserService(UserRepository(session))
     result = await service.create_user(user_schema)
     assert result is not None
@@ -27,12 +28,12 @@ async def test_create_user_service_ok(async_session_maker):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("expected, arg", [
-    (UserNameAlreadyExistsError, user_data_exist_name),
-    (UserEmailAlreadyExistsError, user_data_exist_email)
+    (UserNameAlreadyExistsError,user_data_exist_name_v2),
+    (UserEmailAlreadyExistsError, user_data_exist_email_v2)
 ])
 async def test_create_user_service_400(async_session_maker, expected, arg):
     async with async_session_maker() as session:
-        user_schema = CreateUserSchema(**user_data_ok)
+        user_schema = CreateUserSchema(**user_data_ok_password_v2)
         service = UserService(UserRepository(session))
         await service.create_user(user_schema)
         with pytest.raises(expected):
@@ -119,7 +120,7 @@ async def test_update_user_forbidden_error(async_session_maker):
 async def test_soft_delete_ok(async_session_maker):
     async with async_session_maker() as session:
         service = UserService(UserRepository(session))
-        await service.create_user(CreateUserSchema(**user_data_ok))
+        await service.create_user(CreateUserSchema(**user_data_ok_password_v2))
         user = (await session.scalars(select(UserModel))).first()
         response = await service.soft_delete(user, user.id)
         await session.refresh(user)
@@ -134,7 +135,7 @@ async def test_soft_delete_forbidden(async_session_maker):
     async with async_session_maker() as session:
         service = UserService(UserRepository(session))
 
-        await service.create_user(CreateUserSchema(**user_data_ok))
+        await service.create_user(CreateUserSchema(**user_data_ok_password_v2))
 
         user = (await session.scalars(select(UserModel))).first()
 
@@ -147,7 +148,7 @@ async def test_hard_delete_ok(async_session_maker):
     async with async_session_maker() as session:
         service = UserService(UserRepository(session))
 
-        await service.create_user(CreateUserSchema(**user_data_ok))
+        await service.create_user(CreateUserSchema(**user_data_ok_password_v2))
 
         user = (await session.scalars(select(UserModel))).first()
 
@@ -168,7 +169,7 @@ async def test_hard_delete_forbidden(async_session_maker):
     async with async_session_maker() as session:
         service = UserService(UserRepository(session))
 
-        await service.create_user(CreateUserSchema(**user_data_ok))
+        await service.create_user(CreateUserSchema(**user_data_ok_password_v2))
 
         user = (await session.scalars(select(UserModel))).first()
 
@@ -188,6 +189,7 @@ async def test_authorization_ok(async_session_maker):
             OAuth2PasswordRequestForm(username=user_data_ok["email"], password=user_data_ok["hashed_password"]))
         assert result is not None
 
+
 @pytest.mark.asyncio
 async def test_authorization_fail(async_session_maker):
     async with async_session_maker() as session:
@@ -198,6 +200,5 @@ async def test_authorization_fail(async_session_maker):
 
         await session.commit()
         with pytest.raises(UserAuthorizationError):
-            result = await service.authorization(
+            await service.authorization(
                 OAuth2PasswordRequestForm(username=user_data_ok["email"], password="123"))
-

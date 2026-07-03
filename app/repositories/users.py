@@ -17,11 +17,11 @@ class UserRepository:
         stmt = select(UserModel)
         return (await self.db.scalars(stmt)).all()
 
-    async def create(self, user_data: CreateUserSchema) -> UserModel:
+    async def create(self, user_data: dict) -> UserModel:
         """
             INSERT query for add new user in db
         """
-        new_user = UserModel(**user_data.model_dump())
+        new_user = UserModel(**user_data)
         self.db.add(new_user)
         await self.db.flush()
         await self.db.refresh(new_user)
