@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 from app.models.users import User as UserModel
 from app.schemas.users import UserResponseSchema, CreateUserSchema, UpdateUserSchema
@@ -62,6 +62,6 @@ async def hard_delete(user_id: int, user: UserModel = Depends(get_current_user),
     return await service.hard_delete(user, user_id)
 
 
-@router.post("/token")
+@router.post("/token", status_code=status.HTTP_200_OK)
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), service: UserService = Depends(get_user_service)):
     return await service.authorization(form_data)

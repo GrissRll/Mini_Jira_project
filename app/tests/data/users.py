@@ -97,3 +97,12 @@ user_data_update_existing_user_name = {
 "user_name": "Ivan Petrov"
 
 }
+
+user_data_login_ok = {
+    "username": "ivan.petrov@example.com",
+    "password": "12345_7891"
+}
+user_data_login_wrong = {
+    "username": "ivan.petrov@example",
+    "password": "12345_7891"
+}
