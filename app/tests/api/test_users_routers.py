@@ -1,8 +1,11 @@
 import pytest
 from app.tests.data.users import users_data, user_data_ok, user_data_wrong, user_data_exist_email, user_data_exist_name, \
-    user_data_ok_password_v2, user_data_exist_email_v2, user_data_exist_name_v2
+    user_data_ok_password_v2, user_data_exist_email_v2, user_data_exist_name_v2, user_data_update_all, \
+    user_data_update_existing_email, user_data_update_existing_user_name, user_data_user2
 from app.models.users import User as UserModel
-from sqlalchemy import insert
+from sqlalchemy import insert, select
+from app.tests.fixtures.users import create_user_fix
+from app.core.auth import create_access_token
 
 
 @pytest.mark.asyncio
@@ -85,3 +88,49 @@ async def test_get_user_by_id_200(client, async_session_maker):
 async def test_get_user_by_id_422(client):
     response = await client.get('/users/dac')
     assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_update_router_200(client, create_user_fix, async_session_maker):
+    async with async_session_maker() as session:
+        stmt = select(UserModel)
+        user = (await session.scalars(stmt)).first()
+        await session.close()
+    access_token = create_access_token(data={"sub": user.email, "id": user.id})
+    response = await client.patch("/users/1", json=user_data_update_all,
+                                  headers={"Authorization": f"Bearer {access_token}"})
+    resp_data = response.json()
+    assert response.status_code == 200
+    assert resp_data["email"] == user_data_update_all["email"]
+    assert resp_data["user_name"] == user_data_update_all["user_name"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("expected, arg", [
+    ({"status_code": 409, "detail": "User email already existing"}, user_data_update_existing_email),
+    ({"status_code": 409, "detail": "User name already existing"}, user_data_update_existing_user_name)
+])
+async def test_update_router_409(client, create_user_fix, async_session_maker, expected, arg):
+    async with async_session_maker() as session:
+        stmt = select(UserModel).where(UserModel.email == user_data_user2["email"])
+        user = (await session.scalars(stmt)).first()
+        await session.close()
+    access_token = create_access_token(data={"sub": user.email, "id": user.id})
+
+    response = await client.patch(f"/users/{user.id}", json=arg,
+                                  headers={"Authorization": f"Bearer {access_token}"})
+    assert response.status_code == expected["status_code"]
+    assert response.json()["detail"] == expected["detail"]
+
+@pytest.mark.asyncio
+async def test_update_router_403(client, create_user_fix, async_session_maker):
+    async with async_session_maker() as session:
+        stmt = select(UserModel).where(UserModel.email == user_data_user2["email"])
+        user = (await session.scalars(stmt)).first()
+        await session.close()
+    access_token = create_access_token(data={"sub": user.email, "id": user.id})
+
+    response = await client.patch(f"/users/1", json=user_data_update_all,
+                                  headers={"Authorization": f"Bearer {access_token}"})
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Only owner can update or delete profile"
