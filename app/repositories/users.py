@@ -1,7 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.users import User as UserModel
 from sqlalchemy import select, update, Sequence, or_, and_, delete
-from app.schemas.users import CreateUserSchema
 from sqlalchemy.sql.elements import ClauseElement, ColumnElement
 from pydantic import EmailStr
 

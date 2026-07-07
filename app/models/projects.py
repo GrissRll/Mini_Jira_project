@@ -18,7 +18,7 @@ class Project(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
-    members: Mapped[List['User']] = relationship("User", back_populates="projects")
+    owner: Mapped['User'] = relationship("User", back_populates="projects")
     tasks: Mapped[List['Task']] = relationship("Task", back_populates="project",cascade="all, delete-orphan")
 
 

@@ -15,7 +15,7 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String, nullable=False)
 
     tasks: Mapped[List['Task']] = relationship("Task", back_populates="worker")
-    projects: Mapped[List['Project']] = relationship("Project", back_populates="members")
+    projects: Mapped[List['Project']] = relationship("Project", back_populates="owner")
 
     __table_args__ = (
         UniqueConstraint("email", name="un_users_email"),
