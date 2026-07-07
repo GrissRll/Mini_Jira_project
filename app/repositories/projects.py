@@ -21,7 +21,7 @@ class ProjectRepository:
 
             Return list of filter conditions.
         """
-        filters = [UserModel.is_active == True]
+        filters = [ProjectModel.is_active == True]
         if owner_id is not None:
             filters.append(ProjectModel.owner_id == owner_id)
         if project_id is not None:
@@ -72,7 +72,7 @@ class ProjectRepository:
         await self.db.flush()
         return project
 
-    async def update(self, update_data: dict, project: ProjectModel):
+    async def update(self, update_data: dict, project: ProjectModel) -> ProjectModel:
         """
             UPDATE query for modifying existing project.
 
@@ -80,7 +80,7 @@ class ProjectRepository:
         """
         for key, value in update_data.items():
             setattr(project, key, value)
-        await self.db.refresh(project)
+        await self.db.flush()
         return project
 
     async def soft_delete(self, project_id: int) -> None:

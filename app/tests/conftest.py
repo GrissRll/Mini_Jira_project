@@ -11,6 +11,12 @@ import asyncio
 
 TEST_DATABASE_URL = "postgresql+asyncpg://test_jira_user:test_jira_admin@localhost:5432/test_jira_db"
 
+pytest_plugins = [
+    "app.tests.fixtures.users",
+    "app.tests.fixtures.projects",
+    # "app.tests.fixtures.tasks",
+]
+
 
 @pytest_asyncio.fixture
 async def test_engine():
