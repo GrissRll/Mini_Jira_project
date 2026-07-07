@@ -13,9 +13,11 @@ class ProjectRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    def build_filters(self,
-                      owner_id: int | None = None,
-                      project_id: int | None = None) -> List[ClauseElement | ColumnElement[bool]]:
+    @staticmethod
+    def build_filters(
+            owner_id: int | None = None,
+            project_id: int | None = None,
+            title: str | None = None) -> List[ClauseElement | ColumnElement[bool]]:
         """
             Build a list of SQLAlchemy filter expressions for project queries.
 
@@ -26,20 +28,24 @@ class ProjectRepository:
             filters.append(ProjectModel.owner_id == owner_id)
         if project_id is not None:
             filters.append(ProjectModel.id == project_id)
+        if title is not None:
+            filters.append(ProjectModel.title == title)
         return filters
 
-    async def select_all_for_owner(self, owner_id: int) -> Sequence[ProjectModel]:
+    async def select_many(self, project_id: int | None = None,
+                          owner_id: int | None = None,
+                          title: str | None = None) -> Sequence[ProjectModel]:
         """
             SELECT query for retrieving all active projects for owner.
 
             Return sequence of projects.
         """
-        filters = self.build_filters(owner_id=owner_id)
-        stmt = select(ProjectModel).where(*filters)
+        filters = self.build_filters(project_id, owner_id, title)
+        stmt = select(ProjectModel).where(*filters).order_by(ProjectModel.id)
         res = (await self.db.scalars(stmt)).all()
         return res
 
-    async def select_by_id(self, project_id: int) -> ProjectModel | None:
+    async def select_one(self, project_id: int) -> ProjectModel | None:
         """
             SELECT query for searching project by id.
 
