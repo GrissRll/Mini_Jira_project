@@ -1,18 +1,15 @@
-from calendar import firstweekday
-
 import pytest
 from app.repositories.users import UserRepository
 from fastapi.security import OAuth2PasswordRequestForm
-from app.core.auth import hash_password, verify_password
+from app.core.auth import hash_password
 from app.models.users import User as UserModel
 from app.schemas.users import CreateUserSchema, UpdateUserSchema
-from app.exeptions.users_exeptions import UserEmailAlreadyExistsError, \
+from app.exeptions.units.users_exeptions import UserEmailAlreadyExistsError, \
     UserNameAlreadyExistsError, UserNotFoundError, UserForbiddenError, UserAuthorizationError
 from sqlalchemy import insert, select
 
 from app.services.users_services import UserService
-from app.tests.data.users import users_data, user_data_ok, user_data_exist_email, user_data_exist_name, \
-    user_data_update_all, user_data_update_existing_email, user_data_update_existing_user_name, user_data_ok_password_v2, \
+from app.tests.data.users import users_data, user_data_ok, user_data_update_all, user_data_update_existing_email, user_data_update_existing_user_name, user_data_ok_password_v2, \
     user_data_exist_email_v2, user_data_exist_name_v2
 
 

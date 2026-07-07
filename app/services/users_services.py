@@ -1,7 +1,7 @@
 from app.schemas.users import CreateUserSchema, UpdateUserSchema
 from app.repositories.users import UserRepository
 from app.models.users import User as UserModel
-from app.exeptions.users_exeptions import *
+from app.exeptions.units.users_exeptions import *
 from app.core.auth import verify_password, create_access_token, hash_password
 from sqlalchemy.exc import IntegrityError
 from fastapi.security import OAuth2PasswordRequestForm
@@ -28,7 +28,6 @@ class UserService:
         user_data["hashed_password"] = hash_password(user.password)
         del user_data["password"]
         new_user = await self.user_repo.create(user_data)
-        # На гонку не написан тест...пока посидит
         try:
             await self.user_repo.db.commit()
             return new_user
