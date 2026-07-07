@@ -36,7 +36,7 @@ async def test_select_by_id(async_session_maker, create_user):
         await repo.create(project_data_ok)
         await session.commit()
 
-        project = await repo.select_by_id(1)
+        project = await repo.select_one(project_id=1)
 
         assert project is not None
         assert project.title == project_data_ok["title"]
@@ -46,7 +46,7 @@ async def test_select_by_id_none(async_session_maker, create_user):
     async with async_session_maker() as session:
         repo = ProjectRepository(session)
 
-        project = await repo.select_by_id(100)
+        project = await repo.select_one(100)
 
         assert project is None
 
@@ -88,7 +88,7 @@ async def test_select_all_for_owner(async_session_maker, create_user):
 
         await session.commit()
 
-        projects = await repo.select_all_for_owner(1)
+        projects = await repo.select_many(owner_id=1)
 
         assert len(projects) == 1
         assert projects[0].owner_id == 1
