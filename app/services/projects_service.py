@@ -50,7 +50,7 @@ class ProjectService:
 
     async def update_project(
         self, updated_data: UpdateProjectSchema, user: UserModel, project_id: int
-    ):
+    ) -> ProjectModel:
         existing_project = await self.project_repo.select_one(project_id=project_id)
         if not existing_project:
             raise ProjectNotFoundError()
@@ -61,7 +61,9 @@ class ProjectService:
             if updated_data[key] is None and key == "title":
                 raise ProjectNameNotNullError()
         try:
-            updated_project = await self.project_repo.update(updated_data, existing_project)
+            updated_project = await self.project_repo.update(
+                updated_data, existing_project
+            )
             await self.project_repo.db.commit()
             return updated_project
         except IntegrityError as exc:
@@ -69,4 +71,32 @@ class ProjectService:
             errors = str(exc.orig)
             if "un_projects_title" in errors:
                 raise ProjectNameExistingError()
+        raise
+
+    async def soft_delete(self, project_id: int, user_id: int) -> dict:
+        existing_project = await self.project_repo.select_one(project_id=project_id)
+        if not existing_project:
+            raise ProjectNotFoundError()
+        if existing_project.owner_id != user_id:
+            raise ProjectNotOwnerError()
+        try:
+            await self.project_repo.soft_delete(project_id)
+            await self.project_repo.db.commit()
+            return {"message": "Project status changed to inactive."}
+        except IntegrityError as exc:
+            raise ProjectNotFoundError()
+        raise
+
+    async def hard_delete(self, project_id: int, user_id: int) -> dict:
+        existing_project = await self.project_repo.select_one(project_id=project_id)
+        if not existing_project:
+            raise ProjectNotFoundError()
+        if existing_project.owner_id != user_id:
+            raise ProjectNotOwnerError()
+        try:
+            await self.project_repo.hard_delete(project_id)
+            await self.project_repo.db.commit()
+            return {"message": "Project was deleted."}
+        except IntegrityError as exc:
+            raise ProjectNotFoundError()
         raise
