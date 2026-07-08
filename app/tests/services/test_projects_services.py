@@ -174,3 +174,83 @@ async def test_update_project_409(async_session_maker, create_users_with_project
 
         with pytest.raises(ProjectNameNotNullError):
             await service.update_project(update_data, user, 1)
+
+
+@pytest.mark.asyncio
+async def test_soft_delete_project_ok(async_session_maker, create_user_fix):
+    async with async_session_maker() as session:
+        repo = ProjectRepository(session)
+        service = ProjectService(repo)
+
+        project = await repo.create(project_data_ok)
+        await session.commit()
+
+        result = await service.soft_delete(
+            project_id=project.id,
+            user_id=project.owner_id,
+        )
+
+        await session.refresh(project)
+
+        assert result == {"message": "Project status changed to inactive."}
+        assert project.is_active is False
+
+
+@pytest.mark.asyncio
+async def test_soft_delete_project_not_found(async_session_maker):
+    async with async_session_maker() as session:
+        service = ProjectService(ProjectRepository(session))
+
+        with pytest.raises(ProjectNotFoundError):
+            await service.soft_delete(
+                project_id=1,
+                user_id=1,
+            )
+
+
+@pytest.mark.asyncio
+async def test_soft_delete_project_not_owner(async_session_maker, create_user_fix):
+    async with async_session_maker() as session:
+        repo = ProjectRepository(session)
+        service = ProjectService(repo)
+
+        project = await repo.create(project_data_ok)
+        await session.commit()
+
+        with pytest.raises(ProjectNotOwnerError):
+            await service.soft_delete(
+                project_id=project.id,
+                user_id=999,
+            )
+
+
+@pytest.mark.asyncio
+async def test_hard_delete_project_ok(async_session_maker, create_user_fix):
+    async with async_session_maker() as session:
+        repo = ProjectRepository(session)
+        service = ProjectService(repo)
+
+        project = await repo.create(project_data_ok)
+        await session.commit()
+
+        result = await service.hard_delete(
+            project_id=project.id,
+            user_id=project.owner_id,
+        )
+
+        project_db = await repo.select_one(project.id)
+
+        assert result == {"message": "Project was deleted."}
+        assert project_db is None
+
+
+@pytest.mark.asyncio
+async def test_hard_delete_project_not_found(async_session_maker):
+    async with async_session_maker() as session:
+        service = ProjectService(ProjectRepository(session))
+
+        with pytest.raises(ProjectNotFoundError):
+            await service.hard_delete(
+                project_id=1,
+                user_id=1,
+            )
