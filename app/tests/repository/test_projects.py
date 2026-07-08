@@ -12,6 +12,7 @@ def test_build_filters():
 
     assert len(filters) == 3
 
+
 @pytest.mark.asyncio
 async def test_create(async_session_maker, create_user):
     async with async_session_maker() as session:
@@ -28,6 +29,7 @@ async def test_create(async_session_maker, create_user):
         assert db_project.title == project_data_ok["title"]
         assert db_project.description == project_data_ok["description"]
 
+
 @pytest.mark.asyncio
 async def test_select_by_id(async_session_maker, create_user):
     async with async_session_maker() as session:
@@ -41,6 +43,7 @@ async def test_select_by_id(async_session_maker, create_user):
         assert project is not None
         assert project.title == project_data_ok["title"]
 
+
 @pytest.mark.asyncio
 async def test_select_by_id_none(async_session_maker, create_user):
     async with async_session_maker() as session:
@@ -49,6 +52,7 @@ async def test_select_by_id_none(async_session_maker, create_user):
         project = await repo.select_one(100)
 
         assert project is None
+
 
 @pytest.mark.asyncio
 async def test_select_all(async_session_maker, create_user):
@@ -67,9 +71,10 @@ async def test_select_all(async_session_maker, create_user):
 
         await session.commit()
 
-        projects = await repo.select_all()
+        projects = await repo.select_many()
 
         assert len(projects) == 2
+
 
 @pytest.mark.asyncio
 async def test_select_all_for_owner(async_session_maker, create_user):
@@ -93,27 +98,28 @@ async def test_select_all_for_owner(async_session_maker, create_user):
         assert len(projects) == 1
         assert projects[0].owner_id == 1
 
+
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "expected,arg",
     [
         (
-            {
-                "title": project_data_update["title"],
-                "description": project_data_update["description"],
-            },
-            project_data_update,
+                {
+                    "title": project_data_update["title"],
+                    "description": project_data_update["description"],
+                },
+                project_data_update,
         ),
         (
-            {
-                "title": project_data_ok["title"],
-                "description": project_data_ok["description"],
-            },
-            project_data_update_empty,
+                {
+                    "title": project_data_ok["title"],
+                    "description": project_data_ok["description"],
+                },
+                project_data_update_empty,
         ),
     ],
 )
-async def test_update(async_session_maker,create_user, expected, arg):
+async def test_update(async_session_maker, create_user, expected, arg):
     async with async_session_maker() as session:
         repo = ProjectRepository(session)
 
@@ -137,6 +143,7 @@ async def test_update(async_session_maker,create_user, expected, arg):
         assert db_project.title == expected["title"]
         assert db_project.description == expected["description"]
 
+
 @pytest.mark.asyncio
 async def test_soft_delete(async_session_maker, create_user):
     async with async_session_maker() as session:
@@ -153,6 +160,7 @@ async def test_soft_delete(async_session_maker, create_user):
         ).first()
 
         assert project.is_active is False
+
 
 @pytest.mark.asyncio
 async def test_hard_delete(async_session_maker, create_user):
@@ -171,6 +179,7 @@ async def test_hard_delete(async_session_maker, create_user):
 
         assert project is None
 
+
 @pytest.mark.asyncio
 async def test_select_all_skip_inactive(async_session_maker, create_user):
     async with async_session_maker() as session:
@@ -182,6 +191,6 @@ async def test_select_all_skip_inactive(async_session_maker, create_user):
         await repo.soft_delete(1)
         await session.commit()
 
-        projects = await repo.select_all()
+        projects = await repo.select_many()
 
         assert projects == []

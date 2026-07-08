@@ -45,13 +45,16 @@ class ProjectRepository:
         res = (await self.db.scalars(stmt)).all()
         return res
 
-    async def select_one(self, project_id: int) -> ProjectModel | None:
+    async def select_one(self, project_id: int | None = None,
+                         owner_id: int | None = None,
+                         title: str | None = None
+                         ) -> ProjectModel | None:
         """
             SELECT query for searching project by id.
 
             Return project or None.
         """
-        filters = self.build_filters(project_id=project_id)
+        filters = self.build_filters(project_id=project_id, owner_id=owner_id, title=title)
         stmt = select(ProjectModel).where(*filters)
         res = await self.db.scalar(stmt)
         return res
