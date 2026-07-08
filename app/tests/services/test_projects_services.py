@@ -2,12 +2,19 @@ import pytest
 from app.services.projects_service import ProjectService
 from app.repositories.projects import ProjectRepository
 from app.models.users import User as UserModel
-from app.tests.data.projects import project_data_ok, project_data_second
+from app.tests.data.projects import (
+    project_data_ok,
+    project_data_second,
+    project_data_update,
+    null_title_data_update,
+)
 from app.exeptions.units.projects_exeptions import (
     ProjectNotFoundError,
     ProjectNameExistingError,
+    ProjectNotOwnerError,
+    ProjectNameNotNullError,
 )
-from app.schemas.projects import CreateProjectSchema
+from app.schemas.projects import CreateProjectSchema, UpdateProjectSchema
 from sqlalchemy import select
 
 
@@ -88,7 +95,7 @@ async def test_get_owner_projects_not_found(async_session_maker):
 
 
 @pytest.mark.asyncio
-async def test_create_project_200(async_session_maker, create_user):
+async def test_create_project_200(async_session_maker, create_user_fix):
     async with async_session_maker() as session:
         service = ProjectService(ProjectRepository(session))
         data = CreateProjectSchema(**project_data_ok)
@@ -103,7 +110,7 @@ async def test_create_project_200(async_session_maker, create_user):
 
 
 @pytest.mark.asyncio
-async def test_create_project_409(async_session_maker, create_user):
+async def test_create_project_409(async_session_maker, create_user_fix):
     async with async_session_maker() as session:
         service = ProjectService(ProjectRepository(session))
         data = CreateProjectSchema(**project_data_ok)
@@ -113,3 +120,57 @@ async def test_create_project_409(async_session_maker, create_user):
         await service.create_project(data, user)
         with pytest.raises(ProjectNameExistingError):
             await service.create_project(data, user)
+
+
+@pytest.mark.asyncio
+async def test_update_project_200(async_session_maker, create_users_with_project):
+    async with async_session_maker() as session:
+        service = ProjectService(ProjectRepository(session))
+        user = (
+            await session.scalars(select(UserModel).where(UserModel.id == 1))
+        ).first()
+        update_data = UpdateProjectSchema(**project_data_update)
+        updated_project = await service.update_project(update_data, user, 1)
+
+        assert updated_project is not None
+        assert updated_project.title == project_data_update["title"]
+        assert updated_project.description == project_data_update["description"]
+
+
+@pytest.mark.asyncio
+async def test_update_project_404(async_session_maker, create_users_with_project):
+    async with async_session_maker() as session:
+        service = ProjectService(ProjectRepository(session))
+        user = (
+            await session.scalars(select(UserModel).where(UserModel.id == 1))
+        ).first()
+        update_data = UpdateProjectSchema(**project_data_update)
+
+        with pytest.raises(ProjectNotFoundError):
+            await service.update_project(update_data, user, 12)
+
+
+@pytest.mark.asyncio
+async def test_update_project_403(async_session_maker, create_users_with_project):
+    async with async_session_maker() as session:
+        service = ProjectService(ProjectRepository(session))
+        user = (
+            await session.scalars(select(UserModel).where(UserModel.id == 2))
+        ).first()
+        update_data = UpdateProjectSchema(**project_data_update)
+
+        with pytest.raises(ProjectNotOwnerError):
+            await service.update_project(update_data, user, 1)
+
+
+@pytest.mark.asyncio
+async def test_update_project_409(async_session_maker, create_users_with_project):
+    async with async_session_maker() as session:
+        service = ProjectService(ProjectRepository(session))
+        user = (
+            await session.scalars(select(UserModel).where(UserModel.id == 1))
+        ).first()
+        update_data = UpdateProjectSchema(**null_title_data_update)
+
+        with pytest.raises(ProjectNameNotNullError):
+            await service.update_project(update_data, user, 1)

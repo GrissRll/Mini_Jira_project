@@ -15,3 +15,8 @@ project_data_second = {
 }
 
 project_data_update_empty = {}
+
+null_title_data_update = {
+    "title": None,
+    "description": "Second project V2",
+}
