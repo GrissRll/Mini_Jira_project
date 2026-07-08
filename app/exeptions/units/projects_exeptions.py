@@ -3,3 +3,9 @@ class ProjectNotFoundError(Exception):
 
 class ProjectNameExistingError(Exception):
     pass
+
+class ProjectNotOwnerError(Exception):
+    pass
+
+class ProjectNameNotNullError(Exception):
+    pass

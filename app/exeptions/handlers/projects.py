@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
-from app.exeptions.units.projects_exeptions import ProjectNotFoundError, ProjectNameExistingError
+from app.exeptions.units.projects_exeptions import ProjectNotFoundError, ProjectNameExistingError, ProjectNotOwnerError, \
+    ProjectNameNotNullError
 
 
 def register_exception_handlers(app: FastAPI):
@@ -16,4 +17,18 @@ def register_exception_handlers(app: FastAPI):
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content="Project not found or inactive."
+        )
+
+    @app.exception_handler(ProjectNameNotNullError)
+    def project_name_null_handler(request: Request, exc):
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content="Project name can't be null."
+        )
+
+    @app.exception_handler(ProjectNotOwnerError)
+    def not_project_owner_handler(request: Request, exc):
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content="Only owner can update project."
         )

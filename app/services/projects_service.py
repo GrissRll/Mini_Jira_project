@@ -3,7 +3,8 @@ from app.models.projects import Project as ProjectModel
 from app.models.users import User as UserModel
 from app.schemas.projects import CreateProjectSchema, UpdateProjectSchema
 from typing import List
-from app.exeptions.units.projects_exeptions import ProjectNotFoundError, ProjectNameExistingError
+from app.exeptions.units.projects_exeptions import ProjectNotFoundError, ProjectNameExistingError, ProjectNotOwnerError, \
+    ProjectNameNotNullError
 from sqlalchemy.exc import IntegrityError
 
 
@@ -40,3 +41,24 @@ class ProjectService:
         except IntegrityError as exc:
             await self.project_repo.db.rollback()
             raise ProjectNameExistingError()
+
+    async def update_project(self, updated_data: UpdateProjectSchema, user: UserModel, project_id: int):
+        existing_project = await self.project_repo.select_one(project_id=project_id)
+        if not existing_project:
+            raise ProjectNotFoundError()
+        if existing_project.owner_id != user.id:
+            raise ProjectNotOwnerError()
+        updated_data = updated_data.model_dump(exclude_unset=True)
+        for key in updated_data:
+            if updated_data[key] is None and key == "title":
+                raise ProjectNameNotNullError()
+        try:
+            updated_project = await self.project_repo.update(updated_data)
+            await self.project_repo.db.commit()
+            return updated_project
+        except IntegrityError as exc:
+            await self.project_repo.db.rollback()
+            errors = str(exc.orig)
+            if "un_projects_title" in errors:
+                raise ProjectNameExistingError()
+        raise
