@@ -28,7 +28,7 @@ class ProjectService:
         return projects
 
     async def create_project(self, project_data: CreateProjectSchema, user: UserModel) -> ProjectModel:
-        project_existing = self.project_repo.select_one(title=project_data.title)
+        project_existing = await self.project_repo.select_one(title=project_data.title)
         if project_existing:
             raise ProjectNameExistingError()
         project_data = project_data.model_dump()
