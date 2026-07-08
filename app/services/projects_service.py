@@ -61,7 +61,7 @@ class ProjectService:
             if updated_data[key] is None and key == "title":
                 raise ProjectNameNotNullError()
         try:
-            updated_project = await self.project_repo.update(updated_data)
+            updated_project = await self.project_repo.update(updated_data, existing_project)
             await self.project_repo.db.commit()
             return updated_project
         except IntegrityError as exc:
