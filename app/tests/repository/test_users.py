@@ -4,8 +4,13 @@ from app.models.users import User as UserModel
 from app.schemas.users import CreateUserSchema
 from sqlalchemy import select, insert
 from sqlalchemy.exc import IntegrityError
-from app.tests.data.users import users_data, user_data_ok, user_data_update_all, \
-    user_data_update_email, user_data_update_nothing
+from app.tests.data.users import (
+    users_data,
+    user_data_ok,
+    user_data_update_all,
+    user_data_update_email,
+    user_data_update_nothing,
+)
 
 
 @pytest.mark.asyncio
@@ -56,11 +61,29 @@ async def test_get_all_users_failed(async_session_maker):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("expected, arg", [
-    ({"user_name": user_data_update_all["user_name"], "email": user_data_update_all["email"]}, user_data_update_all),
-    ({"user_name": user_data_ok["user_name"], "email": user_data_update_email["email"]}, user_data_update_email),
-    ({"user_name": user_data_ok["user_name"], "email": user_data_ok["email"]}, user_data_update_nothing)
-])
+@pytest.mark.parametrize(
+    "expected, arg",
+    [
+        (
+            {
+                "user_name": user_data_update_all["user_name"],
+                "email": user_data_update_all["email"],
+            },
+            user_data_update_all,
+        ),
+        (
+            {
+                "user_name": user_data_ok["user_name"],
+                "email": user_data_update_email["email"],
+            },
+            user_data_update_email,
+        ),
+        (
+            {"user_name": user_data_ok["user_name"], "email": user_data_ok["email"]},
+            user_data_update_nothing,
+        ),
+    ],
+)
 async def test_update(async_session_maker, expected, arg):
     async with async_session_maker() as session:
         repo = UserRepository(session)
@@ -76,6 +99,7 @@ async def test_update(async_session_maker, expected, arg):
         assert user.user_name == expected["user_name"]
         assert user.email == expected["email"]
 
+
 @pytest.mark.asyncio
 async def test_soft_delete(async_session_maker):
     async with async_session_maker() as session:
@@ -84,9 +108,13 @@ async def test_soft_delete(async_session_maker):
         await session.commit()
         await user_repo.soft_delete(1)
         await session.commit()
-        active_user = await session.scalars(select(UserModel).where(UserModel.id == 1, UserModel.is_active == True))
+        active_user = await session.scalars(
+            select(UserModel).where(UserModel.id == 1, UserModel.is_active == True)
+        )
         active_user = active_user.first()
-        user_inactive = await session.scalars(select(UserModel).where(UserModel.id == 1))
+        user_inactive = await session.scalars(
+            select(UserModel).where(UserModel.id == 1)
+        )
         user_inactive = user_inactive.first()
         assert active_user is None
         assert user_inactive.is_active == False
@@ -100,9 +128,13 @@ async def test_hard_delete(async_session_maker):
         await session.commit()
         await user_repo.hard_delete(1)
         await session.commit()
-        active_user = await session.scalars(select(UserModel).where(UserModel.id == 1, UserModel.is_active == True))
+        active_user = await session.scalars(
+            select(UserModel).where(UserModel.id == 1, UserModel.is_active == True)
+        )
         active_user = active_user.first()
-        user_inactive = await session.scalars(select(UserModel).where(UserModel.id == 1))
+        user_inactive = await session.scalars(
+            select(UserModel).where(UserModel.id == 1)
+        )
         user_inactive = user_inactive.first()
         assert active_user is None
         assert user_inactive is None

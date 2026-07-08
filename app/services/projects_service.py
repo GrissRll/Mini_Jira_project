@@ -3,8 +3,12 @@ from app.models.projects import Project as ProjectModel
 from app.models.users import User as UserModel
 from app.schemas.projects import CreateProjectSchema, UpdateProjectSchema
 from typing import List
-from app.exeptions.units.projects_exeptions import ProjectNotFoundError, ProjectNameExistingError, ProjectNotOwnerError, \
-    ProjectNameNotNullError
+from app.exeptions.units.projects_exeptions import (
+    ProjectNotFoundError,
+    ProjectNameExistingError,
+    ProjectNotOwnerError,
+    ProjectNameNotNullError,
+)
 from sqlalchemy.exc import IntegrityError
 
 
@@ -28,7 +32,9 @@ class ProjectService:
             raise ProjectNotFoundError()
         return projects
 
-    async def create_project(self, project_data: CreateProjectSchema, user: UserModel) -> ProjectModel:
+    async def create_project(
+        self, project_data: CreateProjectSchema, user: UserModel
+    ) -> ProjectModel:
         project_existing = await self.project_repo.select_one(title=project_data.title)
         if project_existing:
             raise ProjectNameExistingError()
@@ -42,7 +48,9 @@ class ProjectService:
             await self.project_repo.db.rollback()
             raise ProjectNameExistingError()
 
-    async def update_project(self, updated_data: UpdateProjectSchema, user: UserModel, project_id: int):
+    async def update_project(
+        self, updated_data: UpdateProjectSchema, user: UserModel, project_id: int
+    ):
         existing_project = await self.project_repo.select_one(project_id=project_id)
         if not existing_project:
             raise ProjectNotFoundError()

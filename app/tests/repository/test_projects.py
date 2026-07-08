@@ -1,7 +1,11 @@
 import pytest
 from app.repositories.projects import ProjectRepository
 from app.models.projects import Project as ProjectModel
-from app.tests.data.projects import project_data_ok, project_data_update, project_data_update_empty
+from app.tests.data.projects import (
+    project_data_ok,
+    project_data_update,
+    project_data_update_empty,
+)
 from sqlalchemy import select
 
 
@@ -21,9 +25,7 @@ async def test_create(async_session_maker, create_user):
         project = await repo.create(project_data_ok)
         await session.commit()
 
-        db_project = (
-            await session.scalars(select(ProjectModel))
-        ).first()
+        db_project = (await session.scalars(select(ProjectModel))).first()
 
         assert project == db_project
         assert db_project.title == project_data_ok["title"]
@@ -104,18 +106,18 @@ async def test_select_all_for_owner(async_session_maker, create_user):
     "expected,arg",
     [
         (
-                {
-                    "title": project_data_update["title"],
-                    "description": project_data_update["description"],
-                },
-                project_data_update,
+            {
+                "title": project_data_update["title"],
+                "description": project_data_update["description"],
+            },
+            project_data_update,
         ),
         (
-                {
-                    "title": project_data_ok["title"],
-                    "description": project_data_ok["description"],
-                },
-                project_data_update_empty,
+            {
+                "title": project_data_ok["title"],
+                "description": project_data_ok["description"],
+            },
+            project_data_update_empty,
         ),
     ],
 )
@@ -126,18 +128,14 @@ async def test_update(async_session_maker, create_user, expected, arg):
         await repo.create(project_data_ok)
         await session.commit()
 
-        project = (
-            await session.scalars(select(ProjectModel))
-        ).first()
+        project = (await session.scalars(select(ProjectModel))).first()
 
         updated_project = await repo.update(arg, project)
         await session.commit()
         print(updated_project.title)
         print(updated_project.description)
 
-        db_project = (
-            await session.scalars(select(ProjectModel))
-        ).first()
+        db_project = (await session.scalars(select(ProjectModel))).first()
 
         assert updated_project == db_project
         assert db_project.title == expected["title"]
@@ -155,9 +153,7 @@ async def test_soft_delete(async_session_maker, create_user):
         await repo.soft_delete(1)
         await session.commit()
 
-        project = (
-            await session.scalars(select(ProjectModel))
-        ).first()
+        project = (await session.scalars(select(ProjectModel))).first()
 
         assert project.is_active is False
 
@@ -173,9 +169,7 @@ async def test_hard_delete(async_session_maker, create_user):
         await repo.hard_delete(1)
         await session.commit()
 
-        project = (
-            await session.scalars(select(ProjectModel))
-        ).first()
+        project = (await session.scalars(select(ProjectModel))).first()
 
         assert project is None
 

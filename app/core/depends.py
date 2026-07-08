@@ -27,15 +27,21 @@ async def get_user_service(user_repo: UserRepository = Depends(get_user_reposito
     return UserService(user_repository=user_repo)
 
 
-async def get_project_repository(db: AsyncSession = Depends(get_db)) -> ProjectRepository:
+async def get_project_repository(
+    db: AsyncSession = Depends(get_db),
+) -> ProjectRepository:
     return ProjectRepository(db)
 
 
-async def get_project_service(project_repo: ProjectRepository = Depends(get_project_repository)) -> ProjectService:
+async def get_project_service(
+    project_repo: ProjectRepository = Depends(get_project_repository),
+) -> ProjectService:
     return ProjectService(project_repository=project_repo)
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
+async def get_current_user(
+    token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
+):
     credential_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -50,10 +56,13 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has expired",
-            headers={"WWW-Authenticate": "Bearer"}, )
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     except jwt.PyJWTError:
         raise credential_exception
-    result = await db.scalars(select(UserModel).where(UserModel.email == email, UserModel.is_active == True))
+    result = await db.scalars(
+        select(UserModel).where(UserModel.email == email, UserModel.is_active == True)
+    )
     user = result.first()
     if user is None:
         raise credential_exception

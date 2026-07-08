@@ -13,9 +13,9 @@ class UserService:
 
     async def create_user(self, user: CreateUserSchema) -> UserModel:
         """
-            Create new user after validation.
-            Raise exception if user name or email already exists.
-            Return created user.
+        Create new user after validation.
+        Raise exception if user name or email already exists.
+        Return created user.
         """
         filters = self.user_repo._build_or_filter(user.user_name, user.email)
         existing_user = await self.user_repo.get_user_on_filters(filters)
@@ -34,12 +34,14 @@ class UserService:
         except IntegrityError as exc:
             raise UserAlreadyExistsError() from exc
 
-    async def get_all_users(self,
-                            page_num: int = 1,
-                            page_size: int = 10, ) -> list[UserModel]:
+    async def get_all_users(
+        self,
+        page_num: int = 1,
+        page_size: int = 10,
+    ) -> list[UserModel]:
         """
-            Get paginated users list.
-            Return list of users.
+        Get paginated users list.
+        Return list of users.
         """
 
         filters = self.user_repo._buid_and_filter()
@@ -48,9 +50,9 @@ class UserService:
 
     async def get_user_by_id(self, user_id: int) -> UserModel:
         """
-            Get user by identifier.
-            Raise exception if user does not exist.
-            Return user.
+        Get user by identifier.
+        Raise exception if user does not exist.
+        Return user.
         """
 
         filters = self.user_repo._buid_and_filter(user_id=user_id)
@@ -59,13 +61,14 @@ class UserService:
             raise UserNotFoundError()
         return existing_user
 
-    async def update_user(self, updated_data: UpdateUserSchema, user: UserModel,
-                          user_id: int) -> UserModel:
+    async def update_user(
+        self, updated_data: UpdateUserSchema, user: UserModel, user_id: int
+    ) -> UserModel:
         """
-            Update user data after validation.
-            Raise exception if user is forbidden, user does not exist,
-            invalid data is provided or unique fields already exist.
-            Return updated user.
+        Update user data after validation.
+        Raise exception if user is forbidden, user does not exist,
+        invalid data is provided or unique fields already exist.
+        Return updated user.
         """
         if user.id != user_id:
             raise UserForbiddenError()
@@ -97,9 +100,9 @@ class UserService:
 
     async def soft_delete(self, user: UserModel, user_id: int) -> dict:
         """
-            Change user status to inactive.
-            Raise exception if operation is forbidden.
-            Return confirmation message.
+        Change user status to inactive.
+        Raise exception if operation is forbidden.
+        Return confirmation message.
         """
         if user.id != user_id:
             raise UserForbiddenError()
@@ -109,9 +112,9 @@ class UserService:
 
     async def hard_delete(self, user: UserModel, user_id: int) -> dict:
         """
-            Delete user from database.
-            Raise exception if operation is forbidden.
-            Return confirmation message.
+        Delete user from database.
+        Raise exception if operation is forbidden.
+        Return confirmation message.
         """
         if user.id != user_id:
             raise UserForbiddenError()

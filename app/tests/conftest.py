@@ -9,7 +9,9 @@ from app.main import app as prod_app
 from app.models.base import Base
 import asyncio
 
-TEST_DATABASE_URL = "postgresql+asyncpg://test_jira_user:test_jira_admin@localhost:5432/test_jira_db"
+TEST_DATABASE_URL = (
+    "postgresql+asyncpg://test_jira_user:test_jira_admin@localhost:5432/test_jira_db"
+)
 
 pytest_plugins = [
     "app.tests.fixtures.users",

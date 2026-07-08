@@ -4,7 +4,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from typing import List
 
-
 class Project(Base):
     __tablename__ = "projects"
 

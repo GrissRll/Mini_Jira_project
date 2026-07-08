@@ -3,7 +3,7 @@ from app.models.users import User as UserModel
 from app.schemas.users import UserResponseSchema
 from app.models.tasks import Task as TaskModel
 from datetime import datetime
-from .constants import DESCRIPTION_MAX_LENGTH, TITLE_MAX_LENGTH,TITLE_MIN_LENGTH
+from .constants import DESCRIPTION_MAX_LENGTH, TITLE_MAX_LENGTH, TITLE_MIN_LENGTH
 
 
 class BaseProjectSchema(BaseModel):
@@ -11,8 +11,17 @@ class BaseProjectSchema(BaseModel):
 
 
 class CreateProjectSchema(BaseProjectSchema):
-    title: str = Field(..., min_length=TITLE_MIN_LENGTH, max_length=TITLE_MAX_LENGTH, description="Field for project name.")
-    description: str | None = Field(default=None, max_length=DESCRIPTION_MAX_LENGTH, description="Project description")
+    title: str = Field(
+        ...,
+        min_length=TITLE_MIN_LENGTH,
+        max_length=TITLE_MAX_LENGTH,
+        description="Field for project name.",
+    )
+    description: str | None = Field(
+        default=None,
+        max_length=DESCRIPTION_MAX_LENGTH,
+        description="Project description",
+    )
 
 
 class ResponseProjectSchema(CreateProjectSchema):
@@ -25,8 +34,17 @@ class ResponseProjectSchema(CreateProjectSchema):
 
 
 class UpdateProjectSchema(BaseProjectSchema):
-    title: str | None = Field(default=None, min_length=TITLE_MIN_LENGTH, max_length=TITLE_MAX_LENGTH, description="Field for project name.")
-    description: str | None = Field(default=None, max_length=DESCRIPTION_MAX_LENGTH, description="Project description")
+    title: str | None = Field(
+        default=None,
+        min_length=TITLE_MIN_LENGTH,
+        max_length=TITLE_MAX_LENGTH,
+        description="Field for project name.",
+    )
+    description: str | None = Field(
+        default=None,
+        max_length=DESCRIPTION_MAX_LENGTH,
+        description="Project description",
+    )
 
 
 class ProjectShortResponseSchema(BaseProjectSchema):

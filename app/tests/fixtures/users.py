@@ -10,9 +10,11 @@ async def create_user_fix(async_session_maker):
     async with async_session_maker() as session:
         users = []
         for user in (user_data_ok, user_data_user2):
-            data = {"user_name": user["user_name"],
-                    "email": user["email"],
-                    "hashed_password": hash_password(user["hashed_password"])}
+            data = {
+                "user_name": user["user_name"],
+                "email": user["email"],
+                "hashed_password": hash_password(user["hashed_password"]),
+            }
             users.append(UserModel(**data))
 
         session.add_all(users)

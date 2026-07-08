@@ -7,8 +7,8 @@ from enum import Enum as EnumClass
 
 class TaskStatus(EnumClass):
     COMPLETED = "completed"
-    WAITED = 'waited'
-    IN_WORK = 'in_work'
+    WAITED = "waited"
+    IN_WORK = "in_work"
     ON_PAUSE = "on_pause"
 
 
@@ -21,11 +21,15 @@ class Task(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=False)
-    task_status: Mapped[TaskStatus] = mapped_column(Enum(TaskStatus), default=TaskStatus.WAITED)
+    task_status: Mapped[TaskStatus] = mapped_column(
+        Enum(TaskStatus), default=TaskStatus.WAITED
+    )
 
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now()
+    )
     finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
-    project: Mapped['Project'] = relationship("Project", back_populates="tasks")
-    worker: Mapped['User'] = relationship("User", back_populates="tasks")
+    project: Mapped["Project"] = relationship("Project", back_populates="tasks")
+    worker: Mapped["User"] = relationship("User", back_populates="tasks")

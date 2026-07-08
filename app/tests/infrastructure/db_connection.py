@@ -9,5 +9,5 @@ async def check_connection():
         result = await session.scalar(stmt)
         return result
 
-assert asyncio.run(check_connection()) == 1
 
+assert asyncio.run(check_connection()) == 1
