@@ -1,13 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.ext.baked import Result
-
 from app.models.projects import Project as ProjectModel
-from app.models.users import User as UserModel
-from app.models.tasks import Task as TaskModel
-from sqlalchemy import select, update, Sequence, or_, and_, delete
-from sqlalchemy.orm import joinedload
+from sqlalchemy import select, update, Sequence, delete
 from sqlalchemy.sql.elements import ClauseElement, ColumnElement
-from pydantic import EmailStr
 from typing import List
 
 

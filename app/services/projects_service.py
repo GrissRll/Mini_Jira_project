@@ -17,16 +17,30 @@ class ProjectService:
         self.project_repo = project_repository
 
     async def get_projects(self) -> List[ProjectModel]:
+        """
+        Get all projects.
+        Return list of projects.
+        """
         projects = await self.project_repo.select_many()
         return projects
 
     async def get_project(self, project_id: int) -> ProjectModel:
+        """
+        Get project by identifier.
+        Raise exception if project does not exist.
+        Return project.
+        """
         project = await self.project_repo.select_one(project_id)
         if project is None:
             raise ProjectNotFoundError()
         return project
 
     async def get_owner_projects(self, owner_id: int) -> List[ProjectModel]:
+        """
+        Get all projects owned by user.
+        Raise exception if no projects are found.
+        Return list of projects.
+        """
         projects = await self.project_repo.select_many(owner_id)
         if not projects:
             raise ProjectNotFoundError()
@@ -35,6 +49,11 @@ class ProjectService:
     async def create_project(
         self, project_data: CreateProjectSchema, user: UserModel
     ) -> ProjectModel:
+        """
+        Create new project after validation.
+        Raise exception if project title already exists.
+        Return created project.
+        """
         project_existing = await self.project_repo.select_one(title=project_data.title)
         if project_existing:
             raise ProjectNameExistingError()
@@ -51,6 +70,12 @@ class ProjectService:
     async def update_project(
         self, updated_data: UpdateProjectSchema, user: UserModel, project_id: int
     ) -> ProjectModel:
+        """
+        Update project after validation.
+        Raise exception if project does not exist, operation is forbidden,
+        project title is invalid or already exists.
+        Return updated project.
+        """
         existing_project = await self.project_repo.select_one(project_id=project_id)
         if not existing_project:
             raise ProjectNotFoundError()
@@ -74,6 +99,11 @@ class ProjectService:
         raise
 
     async def soft_delete(self, project_id: int, user_id: int) -> dict:
+        """
+        Change project status to inactive.
+        Raise exception if project does not exist or operation is forbidden.
+        Return confirmation message.
+        """
         existing_project = await self.project_repo.select_one(project_id=project_id)
         if not existing_project:
             raise ProjectNotFoundError()
@@ -87,6 +117,11 @@ class ProjectService:
             raise ProjectNotFoundError()
 
     async def hard_delete(self, project_id: int, user_id: int) -> dict:
+        """
+        Delete project from database.
+        Raise exception if project does not exist or operation is forbidden.
+        Return confirmation message.
+        """
         existing_project = await self.project_repo.select_one(project_id=project_id)
         if not existing_project:
             raise ProjectNotFoundError()
