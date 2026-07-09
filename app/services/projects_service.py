@@ -85,7 +85,6 @@ class ProjectService:
             return {"message": "Project status changed to inactive."}
         except IntegrityError as exc:
             raise ProjectNotFoundError()
-        raise
 
     async def hard_delete(self, project_id: int, user_id: int) -> dict:
         existing_project = await self.project_repo.select_one(project_id=project_id)
@@ -93,10 +92,9 @@ class ProjectService:
             raise ProjectNotFoundError()
         if existing_project.owner_id != user_id:
             raise ProjectNotOwnerError()
-        try:
-            await self.project_repo.hard_delete(project_id)
-            await self.project_repo.db.commit()
-            return {"message": "Project was deleted."}
-        except IntegrityError as exc:
+
+        result = await self.project_repo.hard_delete(project_id)
+        if result == 0:
             raise ProjectNotFoundError()
-        raise
+        await self.project_repo.db.commit()
+        return {"message": "Project was deleted."}

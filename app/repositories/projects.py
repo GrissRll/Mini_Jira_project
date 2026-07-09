@@ -1,4 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.baked import Result
+
 from app.models.projects import Project as ProjectModel
 from app.models.users import User as UserModel
 from app.models.tasks import Task as TaskModel
@@ -112,10 +114,11 @@ class ProjectRepository:
         await self.db.execute(stmt)
         await self.db.flush()
 
-    async def hard_delete(self, project_id: int) -> None:
+    async def hard_delete(self, project_id: int) -> int | None:
         """
         DELETE query for permanently removing project.
         """
         stmt = delete(ProjectModel).where(ProjectModel.id == project_id)
-        await self.db.execute(stmt)
+        result = await self.db.execute(stmt)
         await self.db.flush()
+        return result.rowcount

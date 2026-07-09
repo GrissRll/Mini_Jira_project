@@ -18,7 +18,7 @@ def test_build_filters():
 
 
 @pytest.mark.asyncio
-async def test_create(async_session_maker, create_user):
+async def test_create(async_session_maker, create_user_fix):
     async with async_session_maker() as session:
         repo = ProjectRepository(session)
 
@@ -33,7 +33,7 @@ async def test_create(async_session_maker, create_user):
 
 
 @pytest.mark.asyncio
-async def test_select_by_id(async_session_maker, create_user):
+async def test_select_by_id(async_session_maker, create_user_fix):
     async with async_session_maker() as session:
         repo = ProjectRepository(session)
 
@@ -47,7 +47,7 @@ async def test_select_by_id(async_session_maker, create_user):
 
 
 @pytest.mark.asyncio
-async def test_select_by_id_none(async_session_maker, create_user):
+async def test_select_by_id_none(async_session_maker, create_user_fix):
     async with async_session_maker() as session:
         repo = ProjectRepository(session)
 
@@ -57,7 +57,7 @@ async def test_select_by_id_none(async_session_maker, create_user):
 
 
 @pytest.mark.asyncio
-async def test_select_all(async_session_maker, create_user):
+async def test_select_all(async_session_maker, create_user_fix):
     async with async_session_maker() as session:
         repo = ProjectRepository(session)
 
@@ -79,7 +79,7 @@ async def test_select_all(async_session_maker, create_user):
 
 
 @pytest.mark.asyncio
-async def test_select_all_for_owner(async_session_maker, create_user):
+async def test_select_all_for_owner(async_session_maker, create_user_fix):
     async with async_session_maker() as session:
         repo = ProjectRepository(session)
 
@@ -121,7 +121,7 @@ async def test_select_all_for_owner(async_session_maker, create_user):
         ),
     ],
 )
-async def test_update(async_session_maker, create_user, expected, arg):
+async def test_update(async_session_maker, create_user_fix, expected, arg):
     async with async_session_maker() as session:
         repo = ProjectRepository(session)
 
@@ -143,7 +143,7 @@ async def test_update(async_session_maker, create_user, expected, arg):
 
 
 @pytest.mark.asyncio
-async def test_soft_delete(async_session_maker, create_user):
+async def test_soft_delete(async_session_maker, create_user_fix):
     async with async_session_maker() as session:
         repo = ProjectRepository(session)
 
@@ -159,7 +159,7 @@ async def test_soft_delete(async_session_maker, create_user):
 
 
 @pytest.mark.asyncio
-async def test_hard_delete(async_session_maker, create_user):
+async def test_hard_delete(async_session_maker, create_user_fix):
     async with async_session_maker() as session:
         repo = ProjectRepository(session)
 
@@ -175,7 +175,7 @@ async def test_hard_delete(async_session_maker, create_user):
 
 
 @pytest.mark.asyncio
-async def test_select_all_skip_inactive(async_session_maker, create_user):
+async def test_select_all_skip_inactive(async_session_maker, create_user_fix):
     async with async_session_maker() as session:
         repo = ProjectRepository(session)
 
