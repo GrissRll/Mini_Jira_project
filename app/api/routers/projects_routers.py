@@ -13,3 +13,8 @@ from app.services.projects_service import ProjectService
 from typing import List
 
 router = APIRouter(prefix="/projects", tags=["projects"])
+
+
+@router.get("/", response_model=List[ProjectShortResponseSchema], status_code=200)
+async def get_projects(service: ProjectService = Depends(get_project_service)):
+    return await service.get_projects()
