@@ -18,3 +18,10 @@ router = APIRouter(prefix="/projects", tags=["projects"])
 @router.get("/", response_model=List[ProjectShortResponseSchema], status_code=200)
 async def get_projects(service: ProjectService = Depends(get_project_service)):
     return await service.get_projects()
+
+
+@router.get("/{project_id}", response_model=ResponseProjectSchema)
+async def get_project_by_id(
+    project_id: int, service: ProjectService = Depends(get_project_service)
+):
+    return await service.get_project(project_id)
