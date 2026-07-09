@@ -1,6 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.projects import Project as ProjectModel
+from app.models.users import User as UserModel
 from sqlalchemy import select, update, Sequence, delete
+from sqlalchemy.orm import joinedload
 from sqlalchemy.sql.elements import ClauseElement, ColumnElement
 from typing import List
 
@@ -59,7 +61,7 @@ class ProjectRepository:
         filters = self.build_filters(
             project_id=project_id, owner_id=owner_id, title=title
         )
-        stmt = select(ProjectModel).where(*filters)
+        stmt = select(ProjectModel).options(joinedload(ProjectModel.owner)).where(*filters)
         res = await self.db.scalar(stmt)
         return res
 
