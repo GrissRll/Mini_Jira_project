@@ -41,7 +41,7 @@ class ProjectService:
         Raise exception if no projects are found.
         Return list of projects.
         """
-        projects = await self.project_repo.select_many(owner_id)
+        projects = await self.project_repo.select_many(owner_id=owner_id)
         if not projects:
             raise ProjectNotFoundError()
         return projects

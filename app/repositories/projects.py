@@ -42,7 +42,7 @@ class ProjectRepository:
 
         Return sequence of projects.
         """
-        filters = self.build_filters(project_id, owner_id, title)
+        filters = self.build_filters(owner_id=owner_id, project_id=project_id,title=title)
         stmt = select(ProjectModel).where(*filters).order_by(ProjectModel.id)
         res = (await self.db.scalars(stmt)).all()
         return res
