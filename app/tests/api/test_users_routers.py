@@ -191,6 +191,37 @@ async def test_update_router_422(client, create_user_fix, async_session_maker):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("field", ["email", "user_name"])
+async def test_update_router_422_null_required_field(
+    client,
+    create_user_fix,
+    async_session_maker,
+    field,
+):
+    async with async_session_maker() as session:
+        user = (
+            await session.scalars(
+                select(UserModel).where(UserModel.email == user_data_ok["email"])
+            )
+        ).first()
+    access_token = create_access_token(data={"sub": user.email, "id": user.id})
+
+    response = await client.patch(
+        f"/users/{user.id}",
+        json={field: None},
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+
+    assert response.status_code == 422
+    assert response.json() == {
+        "detail": {
+            "field": field,
+            "reason": "cannot be null",
+        }
+    }
+
+
+@pytest.mark.asyncio
 async def test_update_router_401(client, async_session_maker):
     access_token = create_access_token(data={"sub": "323", "id": 2})
 

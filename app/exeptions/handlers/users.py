@@ -50,7 +50,8 @@ def register_exception_handler(app: FastAPI):
     @app.exception_handler(UserInvalidData)
     async def user_owner_handler(request: Request, exc: UserInvalidData):
         return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, content={"detail": exc}
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            content={"detail": {"field": exc.field, "reason": exc.reason}},
         )
 
     @app.exception_handler(UserAuthorizationError)
