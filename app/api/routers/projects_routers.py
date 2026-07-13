@@ -1,7 +1,4 @@
-from fastapi import APIRouter, Depends, status
-from sqlalchemy.util import await_only
-
-from app.models.projects import Project as ProjectModel
+from fastapi import APIRouter, Depends
 from app.models.users import User as UserModel
 from app.schemas.projects import (
     ProjectShortResponseSchema,
@@ -20,6 +17,10 @@ router = APIRouter(prefix="/projects", tags=["projects"])
 
 @router.get("/", response_model=List[ProjectShortResponseSchema], status_code=200)
 async def get_projects(service: ProjectService = Depends(get_project_service)):
+    """
+    Get projects list.
+    Return list of projects.
+    """
     return await service.get_projects()
 
 
@@ -27,6 +28,10 @@ async def get_projects(service: ProjectService = Depends(get_project_service)):
 async def get_project_by_id(
     project_id: int, service: ProjectService = Depends(get_project_service)
 ):
+    """
+    Get project by identifier.
+    Return project.
+    """
     return await service.get_project(project_id)
 
 
@@ -38,6 +43,10 @@ async def get_project_by_id(
 async def get_owner_projects(
     owner_id: int, service: ProjectService = Depends(get_project_service)
 ):
+    """
+    Get projects by owner identifier.
+    Return list of owner's projects.
+    """
     return await service.get_owner_projects(owner_id)
 
 
@@ -47,6 +56,10 @@ async def create_project(
     service: ProjectService = Depends(get_project_service),
     user: UserModel = Depends(get_current_user),
 ):
+    """
+    Create new project.
+    Return created project.
+    """
     return await service.create_project(project_data=project_data, user=user)
 
 
@@ -57,6 +70,10 @@ async def update_project(
     service: ProjectService = Depends(get_project_service),
     user: UserModel = Depends(get_current_user),
 ):
+    """
+    Update project by identifier.
+    Return updated project.
+    """
     return await service.update_project(
         updated_data=updated_data, user=user, project_id=project_id
     )
@@ -70,6 +87,10 @@ async def soft_delete_project(
     service: ProjectService = Depends(get_project_service),
     user: UserModel = Depends(get_current_user),
 ):
+    """
+    Change project status by identifier.
+    Return operation result message.
+    """
     return await service.soft_delete(project_id=project_id, user_id=user.id)
 
 
@@ -79,4 +100,8 @@ async def hard_delete_project(
     service: ProjectService = Depends(get_project_service),
     user: UserModel = Depends(get_current_user),
 ):
+    """
+    Delete project by identifier.
+    Return operation result message.
+    """
     return await service.hard_delete(project_id=project_id, user_id=user.id)

@@ -54,6 +54,10 @@ async def update_user(
     user: UserModel = Depends(get_current_user),
     service: UserService = Depends(get_user_service),
 ):
+    """
+    Update user by identifier.
+    Return updated user.
+    """
     return await service.update_user(update_data, user, user_id)
 
 
@@ -65,6 +69,10 @@ async def soft_delete(
     user: UserModel = Depends(get_current_user),
     service: UserService = Depends(get_user_service),
 ):
+    """
+    Change user status by identifier.
+    Return operation result message.
+    """
     return await service.soft_delete(user, user_id)
 
 
@@ -74,6 +82,10 @@ async def hard_delete(
     user: UserModel = Depends(get_current_user),
     service: UserService = Depends(get_user_service),
 ):
+    """
+    Delete user by identifier.
+    Return operation result message.
+    """
     return await service.hard_delete(user, user_id)
 
 
@@ -82,4 +94,8 @@ async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     service: UserService = Depends(get_user_service),
 ):
+    """
+    Authenticate user with provided credentials.
+    Return access token.
+    """
     return await service.authorization(form_data)
