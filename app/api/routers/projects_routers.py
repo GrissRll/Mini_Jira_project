@@ -60,3 +60,14 @@ async def update_project(
     return await service.update_project(
         updated_data=updated_data, user=user, project_id=project_id
     )
+
+
+@router.patch(
+    "/change_status/{project_id}", response_model=MessageResponse, status_code=200
+)
+async def soft_delete_project(
+    project_id: int,
+    service: ProjectService = Depends(get_project_service),
+    user: UserModel = Depends(get_current_user),
+):
+    return await service.soft_delete(project_id=project_id, user_id=user.id)
