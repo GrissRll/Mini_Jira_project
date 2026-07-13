@@ -90,3 +90,67 @@ async def test_get_project_by_id_router_inactive_project(
     assert response.status_code == 404
     assert response.json()["detail"] == "Project not found or inactive."
 
+
+@pytest.mark.asyncio
+async def test_get_owner_projects_router_200(
+    client,
+    create_user_fix,
+    async_session_maker,
+):
+    other_owner_project = {
+        **project_data_second,
+        "owner_id": 2,
+    }
+    async with async_session_maker() as session:
+        await session.execute(
+            insert(ProjectModel),
+            [project_data_ok, other_owner_project],
+        )
+        await session.commit()
+
+    response = await client.get("/projects/owner/1")
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "id": 1,
+            "title": project_data_ok["title"],
+        }
+    ]
+
+
+@pytest.mark.asyncio
+async def test_get_owner_projects_router_404(client):
+    response = await client.get("/projects/owner/1")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Project not found or inactive."
+
+
+@pytest.mark.asyncio
+async def test_get_owner_projects_router_skips_inactive_projects(
+    client,
+    create_user_fix,
+    async_session_maker,
+):
+    async with async_session_maker() as session:
+        await session.execute(
+            insert(ProjectModel),
+            {
+                **project_data_ok,
+                "is_active": False,
+            },
+        )
+        await session.commit()
+
+    response = await client.get("/projects/owner/1")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Project not found or inactive."
+
+
+@pytest.mark.asyncio
+async def test_get_owner_projects_router_422(client):
+    response = await client.get("/projects/owner/not-an-integer")
+
+    assert response.status_code == 422

@@ -77,12 +77,23 @@ async def test_get_owner_projects(async_session_maker, create_user_fix):
 
         await repo.create(project_data_ok)
         await repo.create(project_data_second)
+        await repo.create(
+            {
+                "title": "Other owner project",
+                "description": "Must not be returned",
+                "owner_id": 2,
+            }
+        )
         await session.commit()
 
         projects = await service.get_owner_projects(1)
 
         assert len(projects) == 2
         assert all(project.owner_id == 1 for project in projects)
+        assert {project.title for project in projects} == {
+            project_data_ok["title"],
+            project_data_second["title"],
+        }
 
 
 @pytest.mark.asyncio
