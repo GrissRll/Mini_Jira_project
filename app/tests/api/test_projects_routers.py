@@ -1,7 +1,26 @@
 import pytest
-from sqlalchemy import insert
+from sqlalchemy import insert, select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+from app.core.auth import create_access_token
 from app.models.projects import Project as ProjectModel
+from app.models.users import User as UserModel
 from app.tests.data.projects import project_data_ok, project_data_second
+from app.tests.data.users import user_data_ok
+
+
+async def build_auth_headers(
+    session_maker: async_sessionmaker[AsyncSession],
+) -> dict[str, str]:
+    async with session_maker() as session:
+        user = (
+            await session.scalars(
+                select(UserModel).where(UserModel.email == user_data_ok["email"])
+            )
+        ).first()
+    assert user is not None
+    access_token = create_access_token(data={"sub": user.email, "id": user.id})
+    return {"Authorization": f"Bearer {access_token}"}
 
 
 @pytest.mark.asyncio
@@ -154,3 +173,98 @@ async def test_get_owner_projects_router_422(client):
     response = await client.get("/projects/owner/not-an-integer")
 
     assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_create_project_router_201(
+    client,
+    create_user_fix,
+    async_session_maker,
+):
+    headers = await build_auth_headers(async_session_maker)
+    project_data = {
+        "title": project_data_ok["title"],
+        "description": project_data_ok["description"],
+    }
+
+    response = await client.post("/projects/", json=project_data, headers=headers)
+
+    assert response.status_code == 201
+    response_data = response.json()
+    assert response_data["title"] == project_data["title"]
+    assert response_data["description"] == project_data["description"]
+    assert response_data["owner"]["email"] == user_data_ok["email"]
+    assert response_data["created_at"] is not None
+
+    async with async_session_maker() as session:
+        project = await session.scalar(
+            select(ProjectModel).where(ProjectModel.id == response_data["id"])
+        )
+
+    assert project is not None
+    assert project.title == project_data["title"]
+    assert project.description == project_data["description"]
+    assert project.owner_id == response_data["owner"]["id"]
+
+
+@pytest.mark.asyncio
+async def test_create_project_router_401(client):
+    response = await client.post(
+        "/projects/",
+        json={
+            "title": project_data_ok["title"],
+            "description": project_data_ok["description"],
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Not authenticated"
+    assert response.headers["WWW-Authenticate"] == "Bearer"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "project_data",
+    [
+        {},
+        {"title": "Jira"},
+        {"title": "x" * 101},
+        {"title": "Valid project", "description": "x" * 2001},
+    ],
+)
+async def test_create_project_router_422(
+    client,
+    create_user_fix,
+    async_session_maker,
+    project_data,
+):
+    headers = await build_auth_headers(async_session_maker)
+
+    response = await client.post("/projects/", json=project_data, headers=headers)
+
+    assert response.status_code == 422
+    assert isinstance(response.json()["detail"], list)
+
+
+@pytest.mark.asyncio
+async def test_create_project_router_409(
+    client,
+    create_user_fix,
+    async_session_maker,
+):
+    async with async_session_maker() as session:
+        await session.execute(insert(ProjectModel), project_data_ok)
+        await session.commit()
+    headers = await build_auth_headers(async_session_maker)
+
+    response = await client.post(
+        "/projects/",
+        json={
+            "title": project_data_ok["title"],
+            "description": "Another description",
+        },
+        headers=headers,
+    )
+
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Project name already existing."
