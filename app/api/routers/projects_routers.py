@@ -1,5 +1,8 @@
 from fastapi import APIRouter, Depends, status
+from sqlalchemy.util import await_only
+
 from app.models.projects import Project as ProjectModel
+from app.models.users import User as UserModel
 from app.schemas.projects import (
     ProjectShortResponseSchema,
     UpdateProjectSchema,
@@ -36,3 +39,12 @@ async def get_owner_projects(
     owner_id: int, service: ProjectService = Depends(get_project_service)
 ):
     return await service.get_owner_projects(owner_id)
+
+
+@router.post("/", response_model=ResponseProjectSchema, status_code=201)
+async def create_project(
+    project_data: CreateProjectSchema,
+    service: ProjectService = Depends(get_project_service),
+    user: UserModel = Depends(get_current_user),
+):
+    return await service.create_project(project_data=project_data, user=user)
