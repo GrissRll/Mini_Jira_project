@@ -96,7 +96,7 @@ class ProjectService:
             errors = str(exc.orig)
             if "un_projects_title" in errors:
                 raise ProjectNameExistingError()
-        raise
+            raise
 
     async def soft_delete(self, project_id: int, user_id: int) -> dict:
         """

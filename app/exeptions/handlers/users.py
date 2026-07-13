@@ -48,7 +48,7 @@ def register_exception_handler(app: FastAPI):
         )
 
     @app.exception_handler(UserInvalidData)
-    async def user_owner_handler(request: Request, exc: UserInvalidData):
+    async def wrong_data_handler(request: Request, exc: UserInvalidData):
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             content={
@@ -60,7 +60,7 @@ def register_exception_handler(app: FastAPI):
         )
 
     @app.exception_handler(UserAuthorizationError)
-    async def user_owner_handler(request: Request, exc: UserAuthorizationError):
+    async def user_autorization_handler(request: Request, exc: UserAuthorizationError):
         return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
             content={"detail": "Incorrect email or password"},
