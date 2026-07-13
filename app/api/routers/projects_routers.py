@@ -25,3 +25,13 @@ async def get_project_by_id(
     project_id: int, service: ProjectService = Depends(get_project_service)
 ):
     return await service.get_project(project_id)
+
+
+@router.get(
+    "/owner/{owner_id}", response_model=List[ProjectShortResponseSchema], status_code=200
+)
+async def get_owner_projects(
+    owner_id: int, service: ProjectService = Depends(get_project_service)
+):
+    return await service.get_owner_projects(owner_id)
+

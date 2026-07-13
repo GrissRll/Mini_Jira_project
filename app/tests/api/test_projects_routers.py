@@ -89,3 +89,4 @@ async def test_get_project_by_id_router_inactive_project(
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Project not found or inactive."
+
