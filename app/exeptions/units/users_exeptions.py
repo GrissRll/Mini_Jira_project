@@ -17,6 +17,7 @@ class UserNotFoundError(Exception):
 class UserForbiddenError(Exception):
     pass
 
+
 class UserAuthorizationError(Exception):
     pass
 

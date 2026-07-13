@@ -42,7 +42,9 @@ class ProjectRepository:
 
         Return sequence of projects.
         """
-        filters = self.build_filters(owner_id=owner_id, project_id=project_id,title=title)
+        filters = self.build_filters(
+            owner_id=owner_id, project_id=project_id, title=title
+        )
         stmt = select(ProjectModel).where(*filters).order_by(ProjectModel.id)
         res = (await self.db.scalars(stmt)).all()
         return res
@@ -61,7 +63,9 @@ class ProjectRepository:
         filters = self.build_filters(
             project_id=project_id, owner_id=owner_id, title=title
         )
-        stmt = select(ProjectModel).options(joinedload(ProjectModel.owner)).where(*filters)
+        stmt = (
+            select(ProjectModel).options(joinedload(ProjectModel.owner)).where(*filters)
+        )
         res = await self.db.scalar(stmt)
         return res
 

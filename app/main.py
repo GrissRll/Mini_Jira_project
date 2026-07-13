@@ -11,6 +11,7 @@ register_handlers(app)
 app.include_router(users_router)
 app.include_router(projects_router)
 
+
 @app.get(path="/", response_class=JSONResponse)
 async def index():
     return {"message": "start_app"}
