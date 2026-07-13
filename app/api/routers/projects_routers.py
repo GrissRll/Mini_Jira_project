@@ -71,3 +71,12 @@ async def soft_delete_project(
     user: UserModel = Depends(get_current_user),
 ):
     return await service.soft_delete(project_id=project_id, user_id=user.id)
+
+
+@router.delete("/{project_id}", response_model=MessageResponse, status_code=200)
+async def hard_delete_project(
+    project_id: int,
+    service: ProjectService = Depends(get_project_service),
+    user: UserModel = Depends(get_current_user),
+):
+    return await service.hard_delete(project_id=project_id, user_id=user.id)
