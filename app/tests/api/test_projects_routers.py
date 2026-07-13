@@ -464,3 +464,117 @@ async def test_update_project_router_422(
 
     assert response.status_code == 422
     assert isinstance(response.json()["detail"], list)
+
+
+@pytest.mark.asyncio
+async def test_soft_delete_project_router_200(
+    client,
+    create_users_with_project,
+    async_session_maker,
+):
+    headers = await build_auth_headers(async_session_maker)
+
+    response = await client.patch(
+        "/projects/change_status/1",
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"message": "Project status changed to inactive."}
+
+    async with async_session_maker() as session:
+        project = await session.get(ProjectModel, 1)
+
+    assert project is not None
+    assert project.is_active is False
+
+
+@pytest.mark.asyncio
+async def test_soft_delete_project_router_401(client):
+    response = await client.patch("/projects/change_status/1")
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Not authenticated"
+    assert response.headers["WWW-Authenticate"] == "Bearer"
+
+
+@pytest.mark.asyncio
+async def test_soft_delete_project_router_403(
+    client,
+    create_users_with_project,
+    async_session_maker,
+):
+    headers = await build_auth_headers(
+        async_session_maker,
+        email=user_data_user2["email"],
+    )
+
+    response = await client.patch(
+        "/projects/change_status/1",
+        headers=headers,
+    )
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Only owner can update project."
+
+    async with async_session_maker() as session:
+        project = await session.get(ProjectModel, 1)
+
+    assert project is not None
+    assert project.is_active is True
+
+
+@pytest.mark.asyncio
+async def test_soft_delete_project_router_404(
+    client,
+    create_user_fix,
+    async_session_maker,
+):
+    headers = await build_auth_headers(async_session_maker)
+
+    response = await client.patch(
+        "/projects/change_status/999",
+        headers=headers,
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Project not found or inactive."
+
+
+@pytest.mark.asyncio
+async def test_soft_delete_project_router_inactive_project_404(
+    client,
+    create_users_with_project,
+    async_session_maker,
+):
+    async with async_session_maker() as session:
+        project = await session.get(ProjectModel, 1)
+        assert project is not None
+        project.is_active = False
+        await session.commit()
+    headers = await build_auth_headers(async_session_maker)
+
+    response = await client.patch(
+        "/projects/change_status/1",
+        headers=headers,
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Project not found or inactive."
+
+
+@pytest.mark.asyncio
+async def test_soft_delete_project_router_422(
+    client,
+    create_user_fix,
+    async_session_maker,
+):
+    headers = await build_auth_headers(async_session_maker)
+
+    response = await client.patch(
+        "/projects/change_status/not-an-integer",
+        headers=headers,
+    )
+
+    assert response.status_code == 422
+    assert isinstance(response.json()["detail"], list)
