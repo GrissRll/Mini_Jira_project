@@ -48,3 +48,15 @@ async def create_project(
     user: UserModel = Depends(get_current_user),
 ):
     return await service.create_project(project_data=project_data, user=user)
+
+
+@router.patch("/{project_id}", response_model=ResponseProjectSchema, status_code=200)
+async def update_project(
+    updated_data: UpdateProjectSchema,
+    project_id: int,
+    service: ProjectService = Depends(get_project_service),
+    user: UserModel = Depends(get_current_user),
+):
+    return await service.update_project(
+        updated_data=updated_data, user=user, project_id=project_id
+    )
