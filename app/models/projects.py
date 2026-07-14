@@ -20,7 +20,9 @@ class Project(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(String(120), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    owner_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
@@ -29,7 +31,10 @@ class Project(Base):
 
     owner: Mapped["User"] = relationship("User", back_populates="projects")
     tasks: Mapped[List["Task"]] = relationship(
-        "Task", back_populates="project", cascade="all, delete-orphan"
+        "Task",
+        back_populates="project",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
 
     __table_args__ = (UniqueConstraint("title", name="un_projects_title"),)

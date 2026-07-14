@@ -16,8 +16,12 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     hashed_password: Mapped[str] = mapped_column(String, nullable=False)
 
-    tasks: Mapped[List["Task"]] = relationship("Task", back_populates="worker")
-    projects: Mapped[List["Project"]] = relationship("Project", back_populates="owner")
+    tasks: Mapped[List["Task"]] = relationship(
+        "Task", back_populates="worker", passive_deletes=True
+    )
+    projects: Mapped[List["Project"]] = relationship(
+        "Project", back_populates="owner", passive_deletes=True
+    )
 
     __table_args__ = (
         UniqueConstraint("email", name="un_users_email"),
