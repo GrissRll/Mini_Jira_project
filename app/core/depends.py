@@ -2,8 +2,10 @@ from .database import async_session_maker
 from typing import AsyncGenerator
 from app.repositories.users import UserRepository
 from app.repositories.projects import ProjectRepository
+from app.repositories.tasks import TaskRepository
 from app.services.projects_service import ProjectService
 from app.services.users_services import UserService
+from app.services.tasks_service import TaskService
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -37,6 +39,22 @@ async def get_project_service(
     project_repo: ProjectRepository = Depends(get_project_repository),
 ) -> ProjectService:
     return ProjectService(project_repository=project_repo)
+
+
+async def get_task_repository(db: AsyncSession = Depends(get_db)):
+    return TaskRepository(db=db)
+
+
+async def get_task_service(
+    task_repository: TaskRepository = Depends(get_task_repository),
+    project_repository: ProjectRepository = Depends(get_project_repository),
+    user_repository: UserRepository = Depends(get_user_repository),
+):
+    return TaskService(
+        task_repository=task_repository,
+        user_repo=user_repository,
+        project_repo=project_repository,
+    )
 
 
 async def get_current_user(
