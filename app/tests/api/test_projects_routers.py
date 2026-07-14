@@ -233,7 +233,7 @@ async def test_create_project_router_401(client):
     [
         {},
         {"title": "Jira"},
-        {"title": "x" * 101},
+        {"title": "x" * 121},
         {"title": "Valid project", "description": "x" * 2001},
     ],
 )
@@ -443,7 +443,7 @@ async def test_update_project_router_409_null_title(
     [
         ("not-an-integer", project_data_update),
         (1, {"title": "Jira"}),
-        (1, {"title": "x" * 101}),
+        (1, {"title": "x" * 121}),
         (1, {"description": "x" * 2001}),
     ],
 )
