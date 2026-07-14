@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from app.api.routers.users_routers import router as users_router
 from app.api.routers.projects_routers import router as projects_router
-from app.exeptions.registry import register_handlers
+from app.exceptions.registry import register_handlers
 
 app = FastAPI()
 

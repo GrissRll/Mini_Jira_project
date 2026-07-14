@@ -1,7 +1,7 @@
 from fastapi import FastAPI, status, Request
 from fastapi.responses import JSONResponse
 
-from app.exeptions.units.users_exeptions import (
+from app.exceptions.units.users_exceptions import (
     UserAlreadyExistsError,
     UserEmailAlreadyExistsError,
     UserForbiddenError,

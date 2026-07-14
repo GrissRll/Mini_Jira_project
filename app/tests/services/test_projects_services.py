@@ -8,7 +8,7 @@ from app.tests.data.projects import (
     project_data_update,
     null_title_data_update,
 )
-from app.exeptions.units.projects_exeptions import (
+from app.exceptions.units.projects_exceptions import (
     ProjectNotFoundError,
     ProjectNameExistingError,
     ProjectNotOwnerError,

@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.core.auth import hash_password
 from app.models.users import User as UserModel
 from app.schemas.users import CreateUserSchema, UpdateUserSchema
-from app.exeptions.units.users_exeptions import (
+from app.exceptions.units.users_exceptions import (
     UserEmailAlreadyExistsError,
     UserNameAlreadyExistsError,
     UserNotFoundError,

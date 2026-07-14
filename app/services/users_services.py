@@ -1,7 +1,7 @@
 from app.schemas.users import CreateUserSchema, UpdateUserSchema
 from app.repositories.users import UserRepository
 from app.models.users import User as UserModel
-from app.exeptions.units.users_exeptions import *
+from app.exceptions.units.users_exceptions import *
 from app.core.auth import verify_password, create_access_token, hash_password
 from sqlalchemy.exc import IntegrityError
 from fastapi.security import OAuth2PasswordRequestForm

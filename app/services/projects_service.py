@@ -3,7 +3,7 @@ from app.models.projects import Project as ProjectModel
 from app.models.users import User as UserModel
 from app.schemas.projects import CreateProjectSchema, UpdateProjectSchema
 from typing import List
-from app.exeptions.units.projects_exeptions import (
+from app.exceptions.units.projects_exceptions import (
     ProjectNotFoundError,
     ProjectNameExistingError,
     ProjectNotOwnerError,

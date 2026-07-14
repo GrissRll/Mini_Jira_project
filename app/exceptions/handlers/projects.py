@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
-from app.exeptions.units.projects_exeptions import (
+from app.exceptions.units.projects_exceptions import (
     ProjectNotFoundError,
     ProjectNameExistingError,
     ProjectNotOwnerError,
