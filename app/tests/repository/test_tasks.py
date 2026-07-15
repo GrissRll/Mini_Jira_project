@@ -9,6 +9,8 @@ from app.tests.data.tasks import (
     task_data_second,
 )
 from app.types.filters import TasksFilter
+from app.types.ordering import Ordering
+from app.types.paginations import Pagination
 
 
 @pytest.mark.asyncio
@@ -153,3 +155,73 @@ async def test_create_returns_none_for_duplicate_project_title(
             )
         )
         assert tasks_count == 1
+
+
+@pytest.mark.asyncio
+async def test_select_many_returns_only_active_tasks(
+    async_session_maker, create_tasks
+):
+    async with async_session_maker() as session:
+        repository = TaskRepository(session)
+
+        tasks = await repository.select_many(
+            order=Ordering(columns=("id",)),
+            pagination=Pagination(),
+            task_filter=TasksFilter(),
+        )
+
+        assert [task["id"] for task in tasks] == [1, 2]
+        assert task_data_inactive["title"] not in {
+            task["title"] for task in tasks
+        }
+
+
+@pytest.mark.asyncio
+async def test_select_many_applies_filters(async_session_maker, create_tasks):
+    async with async_session_maker() as session:
+        repository = TaskRepository(session)
+
+        tasks = await repository.select_many(
+            order=Ordering(columns=("id",)),
+            pagination=Pagination(),
+            task_filter=TasksFilter(
+                project_id=1,
+                worker_id=2,
+                title=task_data_second["title"],
+            ),
+        )
+
+        assert len(tasks) == 1
+        assert tasks[0]["id"] == 2
+        assert tasks[0]["title"] == task_data_second["title"]
+
+
+@pytest.mark.asyncio
+async def test_select_many_applies_descending_order(
+    async_session_maker, create_tasks
+):
+    async with async_session_maker() as session:
+        repository = TaskRepository(session)
+
+        tasks = await repository.select_many(
+            order=Ordering(columns=("id",), direction="desc"),
+            pagination=Pagination(),
+            task_filter=TasksFilter(),
+        )
+
+        assert [task["id"] for task in tasks] == [2, 1]
+
+
+@pytest.mark.asyncio
+async def test_select_many_applies_pagination(async_session_maker, create_tasks):
+    async with async_session_maker() as session:
+        repository = TaskRepository(session)
+
+        tasks = await repository.select_many(
+            order=Ordering(columns=("id",)),
+            pagination=Pagination(page_num=2, page_size=1),
+            task_filter=TasksFilter(),
+        )
+
+        assert len(tasks) == 1
+        assert tasks[0]["id"] == 2

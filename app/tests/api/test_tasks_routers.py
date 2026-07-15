@@ -118,6 +118,124 @@ async def test_get_task_by_id_router_422(
 
 
 @pytest.mark.asyncio
+async def test_get_tasks_router_200(
+    client,
+    create_tasks,
+    async_session_maker,
+):
+    headers = await build_auth_headers(async_session_maker)
+
+    response = await client.get("/tasks/", headers=headers)
+
+    assert response.status_code == 200
+    assert [task["id"] for task in response.json()] == [1, 2]
+    assert set(response.json()[0]) == {"id", "title", "project_id", "created_at"}
+
+
+@pytest.mark.asyncio
+async def test_get_tasks_router_requires_authentication(client):
+    response = await client.get("/tasks/")
+
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_get_tasks_router_applies_filters(
+    client,
+    create_tasks,
+    async_session_maker,
+):
+    headers = await build_auth_headers(async_session_maker)
+
+    response = await client.get(
+        "/tasks/",
+        params={"worker_id": 2, "title": task_data_first["title"]},
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+@pytest.mark.asyncio
+async def test_get_tasks_router_applies_ordering(
+    client,
+    create_tasks,
+    async_session_maker,
+):
+    headers = await build_auth_headers(async_session_maker)
+
+    response = await client.get(
+        "/tasks/",
+        params={"columns": "id", "direction": "desc"},
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+    assert [task["id"] for task in response.json()] == [2, 1]
+
+
+@pytest.mark.asyncio
+async def test_get_tasks_router_accepts_multiple_ordering_columns(
+    client,
+    create_tasks,
+    async_session_maker,
+):
+    headers = await build_auth_headers(async_session_maker)
+
+    response = await client.get(
+        "/tasks/",
+        params=[("columns", "title"), ("columns", "created_at")],
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+    assert [task["id"] for task in response.json()] == [2, 1]
+
+
+@pytest.mark.asyncio
+async def test_get_tasks_router_applies_pagination(
+    client,
+    create_tasks,
+    async_session_maker,
+):
+    headers = await build_auth_headers(async_session_maker)
+
+    response = await client.get(
+        "/tasks/",
+        params={"page_num": 2, "page_size": 1},
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+    assert [task["id"] for task in response.json()] == [2]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "params",
+    [
+        {"columns": "unknown"},
+        {"direction": "unknown"},
+        {"page_num": 0},
+        {"page_size": 100},
+        {"worker_id": 0},
+    ],
+)
+async def test_get_tasks_router_rejects_invalid_query_params(
+    client,
+    create_tasks,
+    async_session_maker,
+    params,
+):
+    headers = await build_auth_headers(async_session_maker)
+
+    response = await client.get("/tasks/", params=params, headers=headers)
+
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
 async def test_create_task_router_201(
     client,
     create_users_with_project,

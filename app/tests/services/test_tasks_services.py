@@ -16,8 +16,10 @@ from app.repositories.tasks import TaskRepository
 from app.repositories.users import UserRepository
 from app.services.tasks_service import TaskService
 from app.schemas.tasks import TaskCreateSchema
-from app.tests.data.tasks import task_data_first
+from app.tests.data.tasks import task_data_first, task_data_second
 from app.types.filters import TasksFilter
+from app.types.ordering import Ordering
+from app.types.paginations import Pagination
 
 
 def build_task_service(session) -> TaskService:
@@ -70,6 +72,24 @@ async def test_get_task_by_id_inactive_project(async_session_maker, create_tasks
 
         with pytest.raises(ProjectNotFoundError):
             await service.get_task_by_id(task_filter=TasksFilter(task_id=1))
+
+
+@pytest.mark.asyncio
+async def test_select_tasks_returns_filtered_ordered_page(
+    async_session_maker, create_tasks
+):
+    async with async_session_maker() as session:
+        service = build_task_service(session)
+
+        tasks = await service.select_tasks(
+            task_filter=TasksFilter(project_id=1),
+            ordering=Ordering(columns=("id",), direction="desc"),
+            pagination=Pagination(page_num=1, page_size=1),
+        )
+
+        assert len(tasks) == 1
+        assert tasks[0]["id"] == 2
+        assert tasks[0]["title"] == task_data_second["title"]
 
 
 @pytest.mark.asyncio
