@@ -6,11 +6,16 @@ from app.repositories.tasks import TaskRepository
 from app.services.projects_service import ProjectService
 from app.services.users_services import UserService
 from app.services.tasks_service import TaskService
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from app.types.ordering import Ordering, TaskTypeOfOrdering, TaskOrderedColumns
+from app.types.filters import TasksFilter
+from app.models.tasks import TaskStatus
+from app.schemas.constants import TITLE_MIN_LENGTH, TITLE_MAX_LENGTH
+from app.types.paginations import Pagination
 from app.models.users import User as UserModel
-from app.core.auth import hash_password, oauth2_scheme, verify_password
+from app.core.auth import oauth2_scheme
 from app.core.config import ALGORITHM, SECRET_KEY
 import jwt
 
@@ -85,3 +90,35 @@ async def get_current_user(
     if user is None:
         raise credential_exception
     return user
+
+
+def get_pagination(
+    page_num: int = Query(default=1, ge=1, le=9999),
+    page_size: int = Query(default=10, ge=1, le=99),
+) -> Pagination:
+    return Pagination(page_num=page_num, page_size=page_size)
+
+
+def get_filters(
+    task_id: int | None = Query(default=None, ge=1, le=1000000),
+    project_id: int | None = Query(default=None, ge=1, le=100000),
+    title: str | None = Query(
+        default=None, min_length=TITLE_MIN_LENGTH, max_length=TITLE_MAX_LENGTH
+    ),
+    worker_id: int | None = Query(default=None, ge=1, le=100000),
+    task_status: TaskStatus | None = Query(default=None),
+) -> TasksFilter:
+    return TasksFilter(
+        task_id=task_id,
+        task_status=task_status,
+        title=title,
+        worker_id=worker_id,
+        project_id=project_id,
+    )
+
+
+def get_order(
+    direction: TaskTypeOfOrdering = Query(default="asc"),
+    columns: tuple[TaskOrderedColumns, ...] = Query(default=("id",)),
+) -> Ordering:
+    return Ordering(columns=columns, direction=direction)
