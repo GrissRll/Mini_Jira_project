@@ -1,8 +1,12 @@
 from dataclasses import dataclass
-from app.repositories.tasks import OrderedColumns, TypeOfOrdering
 
+from typing import Literal
+
+TaskOrderedColumns = Literal["id", "title", "task_status", "created_at"]
+TaskTypeOfOrdering = Literal["asc", "desc"]
 
 @dataclass(slots=True)
 class Ordering:
-    columns: tuple[OrderedColumns, ...]
-    direction: TypeOfOrdering = "asc"
+    columns: tuple[TaskOrderedColumns, ...]
+    direction: TaskTypeOfOrdering = "asc"
+
