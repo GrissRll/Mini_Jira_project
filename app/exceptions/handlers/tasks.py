@@ -17,10 +17,10 @@ def register_exception_handlers(app: FastAPI):
         )
 
     @app.exception_handler(TaskForbiddenError)
-    def task_forbidden_handler(request, exc):
+    def task_forbidden_handler(request, exc: TaskForbiddenError):
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN,
-            content={"detail": "Only project owner can change task"},
+            content={"detail": f"Only {exc.status} can {exc.action} task"},
         )
 
     @app.exception_handler(TaskAlreadyExistsError)

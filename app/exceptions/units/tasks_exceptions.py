@@ -9,6 +9,11 @@ class TaskAlreadyExistsError(Exception):
 class TaskForbiddenError(Exception):
     """Raised when a user is not allowed to modify a task."""
 
+    def __init__(self, action: str, status: str):
+        self.action = action
+        self.status = status
+        super().__init__(f"Only {status} can {action} task.")
+
 
 class TaskInvalidDataError(Exception):
     """Raised when task data violates a business rule."""
