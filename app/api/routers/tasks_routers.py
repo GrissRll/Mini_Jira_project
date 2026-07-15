@@ -22,3 +22,12 @@ async def get_task_by_id(
     user: UserModel = Depends(get_current_user),
 ):
     return await service.get_task_by_id(task_id=task_id)
+
+
+@router.post("/", response_model=TaskResponseSchema, status_code=201)
+async def create_task(
+    task_data: TaskCreateSchema,
+    service: TaskService = Depends(get_task_service),
+    user: UserModel = Depends(get_current_user),
+):
+    return await service.create_task(task_data, user.id)

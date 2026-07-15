@@ -1,4 +1,5 @@
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy import ColumnElement
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.tasks import Task as TaskModel
@@ -40,4 +41,15 @@ class TaskRepository:
         )
         stmt = select(TaskModel).where(*filters)
         task = await self.db.scalar(stmt)
+        return task
+
+    async def create(self, task_data: dict) -> TaskModel | None:
+        stmt = (
+            insert(TaskModel)
+            .values(**task_data)
+            .on_conflict_do_nothing(constraint="un_tasks_project_title")
+            .returning(TaskModel)
+        )
+        result = await self.db.execute(stmt)
+        task = result.scalar_one_or_none()
         return task
