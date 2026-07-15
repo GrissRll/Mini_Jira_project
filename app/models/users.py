@@ -1,5 +1,5 @@
 from .base import Base
-from sqlalchemy import Integer, String, Boolean, DateTime, UniqueConstraint, func, text
+from sqlalchemy import Integer, String, Boolean, DateTime,Text, UniqueConstraint, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import List
 from datetime import datetime
@@ -14,7 +14,7 @@ class User(Base):
         Boolean, default=True, server_default=text("true")
     )
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
-    hashed_password: Mapped[str] = mapped_column(String, nullable=False)
+    hashed_password: Mapped[str] = mapped_column(Text, nullable=False)
 
     tasks: Mapped[List["Task"]] = relationship(
         "Task", back_populates="worker", passive_deletes=True
