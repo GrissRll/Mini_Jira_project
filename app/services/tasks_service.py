@@ -5,6 +5,7 @@ from app.repositories.projects import ProjectRepository
 from app.models.tasks import Task as TaskModel
 from app.repositories.users import UserRepository
 from app.schemas.tasks import TaskCreateSchema
+from app.types.filters import TasksFilter
 from app.exceptions.units.tasks_exceptions import (
     TaskForbiddenError,
     TaskNotFoundError,
@@ -31,10 +32,10 @@ class TaskService:
 
     async def get_task_by_id(
         self,
-        task_id: int,
+        task_filter:TasksFilter,
     ) -> TaskModel:
 
-        task = await self.task_repo.select_one(task_id=task_id)
+        task = await self.task_repo.select_one(task_filter=task_filter)
         if task is None:
             raise TaskNotFoundError()
 

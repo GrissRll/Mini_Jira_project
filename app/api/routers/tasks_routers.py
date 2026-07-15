@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Path
 from app.models.users import User as UserModel
+from app.types.filters import TasksFilter
 from app.schemas.tasks import (
     TaskShortResponseSchema,
     TaskCreateSchema,
@@ -21,7 +22,9 @@ async def get_task_by_id(
     service: TaskService = Depends(get_task_service),
     user: UserModel = Depends(get_current_user),
 ):
-    return await service.get_task_by_id(task_id=task_id)
+    task_filter = TasksFilter(task_id=task_id)
+
+    return await service.get_task_by_id(task_filter=task_filter)
 
 
 @router.post("/", response_model=TaskResponseSchema, status_code=201)
