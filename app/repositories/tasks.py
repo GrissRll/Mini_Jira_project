@@ -15,6 +15,11 @@ class TaskRepository:
 
     @staticmethod
     def build_ordering(ordering: Ordering) -> Sequence[UnaryExpression[Any]]:
+        """
+        Build a list of SQLAlchemy ordering expressions for task queries.
+
+        Return list of ordering expressions.
+        """
         order_column: dict = {
             "id": TaskModel.id,
             "title": TaskModel.title,
@@ -36,6 +41,11 @@ class TaskRepository:
 
     @staticmethod
     def build_filters(task_filter: TasksFilter) -> List[ColumnElement]:
+        """
+        Build a list of SQLAlchemy filter expressions for task queries.
+
+        Return list of filter conditions.
+        """
         filters = [TaskModel.is_active == True]
         if task_filter.task_id is not None:
             filters.append(TaskModel.id == task_filter.task_id)
@@ -51,12 +61,22 @@ class TaskRepository:
         return filters
 
     async def select_one(self, task_filter: TasksFilter) -> TaskModel | None:
+        """
+        SELECT query for searching an active task by filters.
+
+        Return task or None.
+        """
         filters = self.build_filters(task_filter)
         stmt = select(TaskModel).where(*filters)
         task = await self.db.scalar(stmt)
         return task
 
     async def create(self, task_data: dict) -> TaskModel | None:
+        """
+        INSERT query for creating a new task.
+
+        Return created task or None if it already exists.
+        """
         stmt = (
             insert(TaskModel)
             .values(**task_data)
@@ -70,6 +90,11 @@ class TaskRepository:
     async def select_many(
         self, order: Ordering, pagination: Pagination, task_filter: TasksFilter
     ) -> Sequence[Mapping[str, Any]]:
+        """
+        SELECT query for retrieving active tasks with query parameters.
+
+        Return filtered, ordered and paginated sequence of tasks.
+        """
         filters = self.build_filters(task_filter=task_filter)
         order_expression = self.build_ordering(ordering=order)
 

@@ -37,6 +37,11 @@ class TaskService:
         self,
         task_filter: TasksFilter,
     ) -> TaskModel:
+        """
+        Get task by identifier.
+        Raise exception if task or its project does not exist.
+        Return task.
+        """
 
         task = await self.task_repo.select_one(task_filter=task_filter)
         if task is None:
@@ -49,6 +54,12 @@ class TaskService:
         return task
 
     async def create_task(self, task_data: TaskCreateSchema, user_id: int) -> TaskModel:
+        """
+        Create new task after validation.
+        Raise exception if related entities are invalid, operation is forbidden,
+        or task already exists.
+        Return created task.
+        """
 
         existing_project = await self.project_repo.select_one(
             project_id=task_data.project_id
@@ -81,6 +92,10 @@ class TaskService:
     async def select_tasks(
         self, task_filter: TasksFilter, ordering: Ordering, pagination: Pagination
     ) -> Sequence[Mapping[str, Any]]:
+        """
+        Get tasks using filters, ordering and pagination.
+        Return sequence of tasks.
+        """
         tasks = await self.task_repo.select_many(
             order=ordering, task_filter=task_filter, pagination=pagination
         )
