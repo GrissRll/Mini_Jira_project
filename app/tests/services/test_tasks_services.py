@@ -17,6 +17,7 @@ from app.repositories.users import UserRepository
 from app.services.tasks_service import TaskService
 from app.schemas.tasks import TaskCreateSchema
 from app.tests.data.tasks import task_data_first
+from app.types.filters import TasksFilter
 
 
 def build_task_service(session) -> TaskService:
@@ -32,7 +33,7 @@ async def test_get_task_by_id(async_session_maker, create_tasks):
     async with async_session_maker() as session:
         service = build_task_service(session)
 
-        task = await service.get_task_by_id(task_id=1)
+        task = await service.get_task_by_id(task_filter=TasksFilter(task_id=1))
 
         assert task.id == 1
         assert task.title == task_data_first["title"]
@@ -45,7 +46,7 @@ async def test_get_task_by_id_not_found(async_session_maker, create_tasks):
         service = build_task_service(session)
 
         with pytest.raises(TaskNotFoundError):
-            await service.get_task_by_id(task_id=999)
+            await service.get_task_by_id(task_filter=TasksFilter(task_id=999))
 
 
 @pytest.mark.asyncio
@@ -54,7 +55,7 @@ async def test_get_task_by_id_inactive_task(async_session_maker, create_tasks):
         service = build_task_service(session)
 
         with pytest.raises(TaskNotFoundError):
-            await service.get_task_by_id(task_id=3)
+            await service.get_task_by_id(task_filter=TasksFilter(task_id=3))
 
 
 @pytest.mark.asyncio
@@ -68,7 +69,7 @@ async def test_get_task_by_id_inactive_project(async_session_maker, create_tasks
         service = build_task_service(session)
 
         with pytest.raises(ProjectNotFoundError):
-            await service.get_task_by_id(task_id=1)
+            await service.get_task_by_id(task_filter=TasksFilter(task_id=1))
 
 
 @pytest.mark.asyncio
