@@ -1,9 +1,12 @@
-from sqlalchemy import select
+from sqlalchemy import select, Sequence as AlchemySequence, UnaryExpression
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy import ColumnElement
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.tasks import Task as TaskModel
-from typing import List
+from app.models.tasks import Task as TaskModel, TaskStatus
+from typing import List, Literal, Sequence, Any
+
+OrderedColumns = Literal["id", "title", "task_status", "created_at"]
+TypeOfOrdering = Literal["asc", "desc"]
 
 
 class TaskRepository:
@@ -11,11 +14,35 @@ class TaskRepository:
         self.db = db
 
     @staticmethod
+    def build_ordering(
+        columns: Sequence[OrderedColumns], ordering: TypeOfOrdering = "asc"
+    ) -> Sequence[UnaryExpression[Any]]:
+        order_column: dict = {
+            "id": TaskModel.id,
+            "title": TaskModel.title,
+            "task_status": TaskModel.task_status,
+            "created_at": TaskModel.created_at,
+        }
+
+        if ordering == "desc":
+            ordered_list = [order_column[column].desc() for column in columns]
+        else:
+            ordered_list = [order_column[column].asc() for column in columns]
+        if "id" not in columns:
+            if ordering == "desc":
+                ordered_list.append(order_column["id"].desc())
+            else:
+                ordered_list.append(order_column["id"].asc())
+
+        return ordered_list
+
+    @staticmethod
     def build_filters(
         task_id: int | None = None,
         project_id: int | None = None,
         title: str | None = None,
         worker_id: int | None = None,
+        task_status: TaskStatus | None = None,
     ) -> List[ColumnElement]:
         filters = [TaskModel.is_active == True]
         if task_id is not None:
@@ -26,6 +53,8 @@ class TaskRepository:
             filters.append(TaskModel.title == title)
         if worker_id is not None:
             filters.append(TaskModel.worker_id == worker_id)
+        if task_status is not None:
+            filters.append(TaskModel.task_status == task_status)
 
         return filters
 
