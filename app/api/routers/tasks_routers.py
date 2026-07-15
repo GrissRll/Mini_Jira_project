@@ -8,10 +8,19 @@ from app.schemas.tasks import (
     TaskResponseSchema,
 )
 from app.schemas.responses import MessageResponse
-from app.core.depends import get_task_service, get_current_user
+from app.core.depends import (
+    get_task_service,
+    get_current_user,
+    get_filters,
+    get_pagination,
+    get_order,
+)
 from app.services.tasks_service import TaskService
 
 from typing import List
+
+from app.types.ordering import Ordering
+from app.types.paginations import Pagination
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -34,3 +43,16 @@ async def create_task(
     user: UserModel = Depends(get_current_user),
 ):
     return await service.create_task(task_data, user.id)
+
+
+@router.get("/", response_model=List[TaskShortResponseSchema], status_code=200)
+async def get_tasks(
+    service: TaskService = Depends(get_task_service),
+    user: UserModel = Depends(get_current_user),
+    task_filter: TasksFilter = Depends(get_filters),
+    pagination: Pagination = Depends(get_pagination),
+    ordering: Ordering = Depends(get_order),
+):
+    return await service.select_tasks(
+        task_filter=task_filter, ordering=ordering, pagination=pagination
+    )

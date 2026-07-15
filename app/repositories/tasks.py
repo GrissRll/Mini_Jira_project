@@ -1,4 +1,4 @@
-from sqlalchemy import select,UnaryExpression
+from sqlalchemy import select, UnaryExpression
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy import ColumnElement
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -65,4 +65,25 @@ class TaskRepository:
         )
         result = await self.db.execute(stmt)
         task = result.scalar_one_or_none()
+        return task
+
+    async def select_many(
+        self, order: Ordering, pagination: Pagination, task_filter: TasksFilter
+    ) -> Sequence[Mapping[str, Any]]:
+        filters = self.build_filters(task_filter=task_filter)
+        order_expression = self.build_ordering(ordering=order)
+
+        stmt = (
+            select(
+                TaskModel.id,
+                TaskModel.title,
+                TaskModel.project_id,
+                TaskModel.created_at,
+            )
+            .where(*filters)
+            .order_by(*order_expression)
+            .offset((pagination.page_num - 1) * pagination.page_size)
+            .limit(pagination.page_size)
+        )
+        task = (await self.db.execute(stmt)).mappings().all()
         return task

@@ -1,11 +1,11 @@
 from sqlalchemy.exc import IntegrityError
-
 from app.repositories.tasks import TaskRepository
 from app.repositories.projects import ProjectRepository
 from app.models.tasks import Task as TaskModel
 from app.repositories.users import UserRepository
 from app.schemas.tasks import TaskCreateSchema
 from app.types.filters import TasksFilter
+from app.types.ordering import Ordering
 from app.exceptions.units.tasks_exceptions import (
     TaskForbiddenError,
     TaskNotFoundError,
@@ -17,6 +17,9 @@ from app.exceptions.units.projects_exceptions import (
     ProjectNotOwnerError,
 )
 from app.exceptions.units.users_exceptions import UserNotFoundError
+from typing import Mapping, Any, Sequence
+
+from app.types.paginations import Pagination
 
 
 class TaskService:
@@ -32,7 +35,7 @@ class TaskService:
 
     async def get_task_by_id(
         self,
-        task_filter:TasksFilter,
+        task_filter: TasksFilter,
     ) -> TaskModel:
 
         task = await self.task_repo.select_one(task_filter=task_filter)
@@ -74,3 +77,12 @@ class TaskService:
             raise
 
         return task
+
+    async def select_tasks(
+        self, task_filter: TasksFilter, ordering: Ordering, pagination: Pagination
+    ) -> Sequence[Mapping[str, Any]]:
+        tasks = await self.task_repo.select_many(
+            order=ordering, task_filter=task_filter, pagination=pagination
+        )
+
+        return tasks
