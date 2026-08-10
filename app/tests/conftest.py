@@ -4,13 +4,14 @@ from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
+from app.core.config import get_settings
 from app.core.depends import get_db
-from app.main import app as prod_app
+from app.main import create_application
 from app.models.base import Base
 import asyncio
 
 TEST_DATABASE_URL = (
-    "postgresql+asyncpg://test_jira_user:test_jira_admin@localhost:5432/test_jira_db"
+    "postgresql+asyncpg://test_user:test_pass@localhost:5433/test_db"
 )
 
 
@@ -41,9 +42,11 @@ async def app_test(async_session_maker):
                 yield session
             finally:
                 await session.rollback()
-
+    prod_app = create_application()
     prod_app.dependency_overrides[get_db] = _get_db
-    yield prod_app
+
+    async with prod_app.router.lifespan_context(prod_app):
+        yield prod_app
     prod_app.dependency_overrides.clear()
 
 

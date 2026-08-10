@@ -1,4 +1,3 @@
-from .database import async_session_maker
 from typing import AsyncGenerator
 from app.repositories.users import UserRepository
 from app.repositories.projects import ProjectRepository
@@ -6,7 +5,7 @@ from app.repositories.tasks import TaskRepository
 from app.services.projects_service import ProjectService
 from app.services.users_services import UserService
 from app.services.tasks_service import TaskService
-from fastapi import Depends, HTTPException, Query, status
+from fastapi import Depends, HTTPException, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.types.ordering import Ordering, TaskTypeOfOrdering, TaskOrderedColumns
@@ -16,13 +15,13 @@ from app.schemas.constants import TITLE_MIN_LENGTH, TITLE_MAX_LENGTH
 from app.types.paginations import Pagination
 from app.models.users import User as UserModel
 from app.core.auth import oauth2_scheme
-from app.core.config import ALGORITHM, SECRET_KEY
 import jwt
 
 
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
+async def get_db(request: Request) -> AsyncGenerator[AsyncSession, None]:
     """Async generator for session object"""
-    async with async_session_maker() as session:
+
+    async with request.app.state.async_session() as session:
         yield session
 
 
@@ -63,15 +62,18 @@ async def get_task_service(
 
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
+    request: Request,
+    token: str = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db),
 ):
+    settings = request.app.state.settings
     credential_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticated": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
         email: str = payload.get("sub")
         if email is None:
             raise credential_exception
